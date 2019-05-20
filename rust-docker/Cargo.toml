@@ -1,0 +1,8 @@
+[package]
+name = "rust-docker"
+version = "0.1.0"
+authors = ["mattjmcnaughton <mattjmcnaughton@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+boondock = { version = "0.0.50", default-features = false }
