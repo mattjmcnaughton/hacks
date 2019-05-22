@@ -1,0 +1,7 @@
+[package]
+name = "enum_ex"
+version = "0.1.0"
+authors = ["mattjmcnaughton <mattjmcnaughton@gmail.com>"]
+edition = "2018"
+
+[dependencies]
