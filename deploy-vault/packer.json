@@ -1,5 +1,12 @@
 {
   "builders": [{
+    "type": "vagrant",
+    "communicator": "ssh",
+    "source_path": "ubuntu/bionic64",
+    "provider": "virtualbox",
+    "teardown_method": "destroy",
+    "skip_package": true
+  }, {
     "type": "amazon-ebs",
     "region": "us-east-1",
     "source_ami_filter": {
@@ -17,6 +24,16 @@
   }],
   "provisioners": [{
     "type": "shell",
+    "script": "base.sh"
+  }, {
+    "type": "shell",
     "script": "install.sh"
+  }, {
+    "type": "file",
+    "source": "goss.yaml",
+    "destination": "/tmp/goss.yaml"
+  }, {
+    "type": "shell",
+    "inline": ["goss -g /tmp/goss.yaml validate"]
   }]
 }

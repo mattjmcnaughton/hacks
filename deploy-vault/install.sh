@@ -80,5 +80,3 @@ sudo chown -R vault:vault /vault
 sudo systemctl enable vault
 sudo systemctl start vault
 sudo systemctl status vault
-
-echo 'Execute `vault operator init` if you have not already inited this vault`'

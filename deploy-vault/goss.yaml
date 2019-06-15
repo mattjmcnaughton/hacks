@@ -1,0 +1,15 @@
+port:
+  tcp:8200:
+    listening: true
+service:
+  vault:
+    enabled: true
+    running: true
+user:
+  vault:
+    exists: true
+    groups:
+    - vault
+process:
+  vault:
+    running: true
