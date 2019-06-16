@@ -5,6 +5,7 @@
     "source_path": "ubuntu/bionic64",
     "provider": "virtualbox",
     "teardown_method": "destroy",
+    "add_force": true,
     "skip_package": true
   }, {
     "type": "amazon-ebs",
