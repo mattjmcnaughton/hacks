@@ -27,6 +27,20 @@
     "type": "shell",
     "script": "base.sh"
   }, {
+    "type": "file",
+    "source": "vault.service",
+    "destination": "/tmp/vault.service"
+  }, {
+    "type": "file",
+    "source": "vagrant-vault.hcl",
+    "destination": "/tmp/vault.hcl",
+    "only": ["vagrant"]
+  }, {
+    "type": "file",
+    "source": "amazon-ebs-vault.hcl",
+    "destination": "/tmp/vault.hcl",
+    "only": ["amazon-ebs"]
+  }, {
     "type": "shell",
     "script": "install.sh"
   }, {

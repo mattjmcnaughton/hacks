@@ -13,3 +13,7 @@ user:
 process:
   vault:
     running: true
+command:
+  smoke_test:
+    exit-status: 0
+    exec: "VAULT_ADDR=http://localhost:8200 vault status"

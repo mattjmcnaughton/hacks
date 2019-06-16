@@ -8,3 +8,7 @@ test:
 
 build:
 	packer build -only=amazon-ebs packer.json
+
+clean:
+	rm -rf output-vagrant
+	rm ubuntu-bionic-18.04-cloudimg-console.log
