@@ -28,7 +28,7 @@ sudo mv /tmp/vault.service /etc/systemd/system/vault.service
 sudo mkdir --parents /etc/vault.d
 sudo mv /tmp/vault.hcl /etc/vault.d/vault.hcl
 sudo chown --recursive vault:vault /etc/vault.d
-sudo chmod 740 /etc/vault.d/vault.hcl
+sudo chmod 644 /etc/vault.d/vault.hcl
 
 if grep -q "/vault" /etc/vault.d/vault.hcl
 then
