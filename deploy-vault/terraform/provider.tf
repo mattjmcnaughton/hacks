@@ -2,4 +2,12 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Configure terraform to use the s3 backend.
+terraform {
+  backend "s3" {
+    bucket  = "mattjmcnaughton-terraform-test"
+    key     = "deploy-vault"
+    region  = "us-east-1"
+    encrypt = true
+  }
+}
+

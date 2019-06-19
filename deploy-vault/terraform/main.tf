@@ -1,11 +1,10 @@
-
 resource "aws_vpc" "vault_demo" {
   cidr_block = "10.0.0.0/16"
 
   tags = {
     Name = "vault_demo"
     team = "vault_demo"
-    env = "test"
+    env  = "test"
   }
 }
 
@@ -15,7 +14,7 @@ resource "aws_kms_key" "vault_demo_unsealor" {
   tags = {
     Name = "vault_demo_unsealor"
     team = "vault_demo"
-    env = "test"
+    env  = "test"
   }
 }
 
@@ -38,6 +37,7 @@ resource "aws_iam_role" "vault_demo_ec2" {
   ]
 }
 EOF
+
 }
 
 resource "aws_iam_policy" "vault_demo_access_kms_key" {
@@ -70,18 +70,11 @@ resource "aws_iam_policy" "vault_demo_access_kms_key" {
   ]
 }
 EOF
-}
-
-resource "aws_iam_policy" "access_dynamo_db" {
 
 }
 
 resource "aws_iam_role_policy_attachment" "attach_vault_demo_ec2_to_access_kms_key" {
-  role = "${aws_iam_role.vault_demo_ec2.name}"
-  policy_arn = "${aws_iam_policy.access_kms_key.arn}"
+role       = aws_iam_role.vault_demo_ec2.name
+policy_arn = aws_iam_policy.access_kms_key.arn
 }
 
-resource "aws_iam_role_policy_attachment" "attach_vault_demo_ec2_to_access_dynamo_db" {
-  role = "${aws_iam_role.vault_demo_ec2.name}"
-  policy_arn = "${aws_iam_policy.access_dynamo_db.arn}"
-}
