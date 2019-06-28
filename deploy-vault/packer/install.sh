@@ -37,5 +37,3 @@ then
 fi
 
 sudo systemctl enable vault
-sudo systemctl start vault
-sudo systemctl status vault

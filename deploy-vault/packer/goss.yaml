@@ -1,19 +1,9 @@
-port:
-  tcp:8200:
-    listening: true
 service:
   vault:
     enabled: true
-    running: true
+    running: false
 user:
   vault:
     exists: true
     groups:
     - vault
-process:
-  vault:
-    running: true
-command:
-  smoke_test:
-    exit-status: 0
-    exec: "VAULT_ADDR=http://localhost:8200 vault status"
