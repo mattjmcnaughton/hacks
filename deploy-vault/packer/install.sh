@@ -12,8 +12,7 @@ curl --silent --remote-name https://releases.hashicorp.com/vault/${VAULT_VERSION
 grep linux_amd64 vault_*_SHA256SUMS | sha256sum -c -
 
 sudo apt update
-sleep 5
-sudo apt install unzip
+sudo apt install unzip || sleep 15; sudo apt install unzip
 
 unzip vault_${VAULT_VERSION}_linux_amd64.zip
 sudo chown root:root vault

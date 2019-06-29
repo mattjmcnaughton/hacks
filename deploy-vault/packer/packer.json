@@ -21,7 +21,7 @@
     },
     "instance_type": "m3.medium",
     "ssh_username": "ubuntu",
-    "ami_name": "vault-test"
+    "ami_name": "vault-test-{{timestamp}}"
   }],
   "provisioners": [{
     "type": "shell",
