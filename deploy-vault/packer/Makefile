@@ -10,5 +10,5 @@ build:
 	packer build -only=amazon-ebs packer.json
 
 clean:
-	rm -rf output-vagrant
-	rm ubuntu-bionic-18.04-cloudimg-console.log
+	rm -rf output-vagrant || true
+	rm ubuntu-bionic-18.04-cloudimg-console.log || true
