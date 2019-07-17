@@ -1,19 +1,6 @@
-/*************************************************************************\
-*                  Copyright (C) Michael Kerrisk, 2019.                   *
-*                                                                         *
-* This program is free software. You may use, modify, and redistribute it *
-* under the terms of the GNU General Public License as published by the   *
-* Free Software Foundation, either version 3 or (at your option) any      *
-* later version. This program is distributed without any warranty.  See   *
-* the file COPYING.gpl-v3 for details.                                    *
-\*************************************************************************/
-
-/* Listing 7-1 */
-
-/* free_and_sbrk.c
-
-   Test if free(3) actually lowers the program break.
-
+/*
+ * Test impact of free(3) on the program break.
+ *
    Usage: free_and_sbrk num-allocs block-size [step [min [max]]]
 
    Try: free_and_sbrk 1000 10240 2 1 1000
@@ -21,7 +8,8 @@
         free_and_sbrk 1000 10240 1 500 1000
 
         (Only the last of these should see the program break lowered.)
-*/
+ */
+
 #define _BSD_SOURCE
 #include "tlpi_hdr.h"
 
@@ -51,7 +39,8 @@ main(int argc, char *argv[])
     if (freeMax > numAllocs)
         cmdLineErr("free-max > num-allocs\n");
 
-    printf("Initial program break:          %10p\n", sbrk(0));
+    // `sbrk(0)` returns the current break.
+    printf("Initial program break:              %10p\n", sbrk(0));
 
     printf("Allocating %d*%d bytes\n", numAllocs, blockSize);
     for (j = 0; j < numAllocs; j++) {
@@ -60,11 +49,9 @@ main(int argc, char *argv[])
             errExit("malloc");
     }
 
-    printf("Program break is now:           %10p\n", sbrk(0));
-
-    printf("Freeing blocks from %d to %d in steps of %d\n",
-                freeMin, freeMax, freeStep);
-    for (j = freeMin - 1; j < freeMax; j += freeStep)
+    printf("Program break is now:              %10p\n", sbrk(0));
+    printf("Freeing blocks from %d to %d in steps of %d\n", freeMin, freeMax, freeStep);
+    for (j = freeMin - 1; j < freeMax; j+= freeStep)
         free(ptr[j]);
 
     printf("After free(), program break is: %10p\n", sbrk(0));

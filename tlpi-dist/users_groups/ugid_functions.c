@@ -1,13 +1,3 @@
-/*************************************************************************\
-*                  Copyright (C) Michael Kerrisk, 2019.                   *
-*                                                                         *
-* This program is free software. You may use, modify, and redistribute it *
-* under the terms of the GNU Lesser General Public License as published   *
-* by the Free Software Foundation, either version 3 or (at your option)   *
-* any later version. This program is distributed without any warranty.    *
-* See the files COPYING.lgpl-v3 and COPYING.gpl-v3 for details.           *
-\*************************************************************************/
-
 /* Listing 8-1 */
 
 /* ugid_functions.c
@@ -18,9 +8,9 @@
 #include <pwd.h>
 #include <grp.h>
 #include <ctype.h>
-#include "ugid_functions.h"     /* Declares functions defined here */
+#include "ugid_functions.h"
 
-char *          /* Return name corresponding to 'uid', or NULL on error */
+char * /* Return name corresponding to 'uid' or NULL on error */
 userNameFromId(uid_t uid)
 {
     struct passwd *pwd;
@@ -29,19 +19,13 @@ userNameFromId(uid_t uid)
     return (pwd == NULL) ? NULL : pwd->pw_name;
 }
 
-uid_t           /* Return UID corresponding to 'name', or -1 on error */
+uid_t /* Return uid corresponding to 'name' or -1 on error */
 userIdFromName(const char *name)
 {
     struct passwd *pwd;
-    uid_t u;
-    char *endptr;
 
-    if (name == NULL || *name == '\0')  /* On NULL or empty string */
-        return -1;                      /* return an error */
-
-    u = strtol(name, &endptr, 10);      /* As a convenience to caller */
-    if (*endptr == '\0')                /* allow a numeric string */
-        return u;
+    if (name == NULL || *name == '\0')
+        return -1
 
     pwd = getpwnam(name);
     if (pwd == NULL)
@@ -63,15 +47,9 @@ gid_t           /* Return GID corresponding to 'name', or -1 on error */
 groupIdFromName(const char *name)
 {
     struct group *grp;
-    gid_t g;
-    char *endptr;
 
     if (name == NULL || *name == '\0')  /* On NULL or empty string */
         return -1;                      /* return an error */
-
-    g = strtol(name, &endptr, 10);      /* As a convenience to caller */
-    if (*endptr == '\0')                /* allow a numeric string */
-        return g;
 
     grp = getgrnam(name);
     if (grp == NULL)
