@@ -2,7 +2,7 @@ include ../Makefile.inc
 
 GEN_EXE = t_getpwent t_getpwnam_r
 
-LINUX_EXE = check_password idshow list_users
+LINUX_EXE = check_password idshow crypt_test list_users
 
 EXE = ${GEN_EXE} ${LINUX_EXE}
 
@@ -15,6 +15,9 @@ clean :
 
 check_password : check_password.o
 	${CC} -o $@ check_password.o ${LDFLAGS} ${LDLIBS} ${LINUX_LIBCRYPT}
+
+crypt_test : crypt_test.o
+	${CC} -o $@ crypt_test.o ${LDFLAGS} ${LDLIBS} ${LINUX_LIBCRYPT}
 
 showall :
 	@ echo ${EXE}
