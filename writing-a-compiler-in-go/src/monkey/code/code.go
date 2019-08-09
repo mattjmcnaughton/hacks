@@ -90,6 +90,8 @@ func Make(op Opcode, operands ...int) []byte {
 		width := def.OperandWidths[i]
 		switch width {
 		case 2:
+			// TODO: Should we have a `PutUint16` helper method,
+			// similar to how we have a `ReadUint16` helper method.
 			binary.BigEndian.PutUint16(instruction[offset:], uint16(o))
 		}
 		offset += width
