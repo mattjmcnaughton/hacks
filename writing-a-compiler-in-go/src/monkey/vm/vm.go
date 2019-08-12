@@ -58,6 +58,9 @@ func (vm *VM) Run() error {
 
 			result := leftValue + rightValue
 			vm.push(&object.Integer{Value: result})
+
+		case code.OpPop:
+			vm.pop()
 		}
 	}
 
@@ -79,14 +82,13 @@ func (vm *VM) pop() object.Object {
 	// TODO: Do we need to error handle around not enough values on the
 	// stack.
 	o := vm.stack[vm.sp-1]
+
+	// Note, we don't actually remove the object from the stack. We just
+	// decrement the stack pointer.
 	vm.sp--
 	return o
 }
 
-func (vm *VM) StackTop() object.Object {
-	if vm.sp == 0 {
-		return nil
-	}
-
-	return vm.stack[vm.sp-1]
+func (vm *VM) LastPoppedStackElem() object.Object {
+	return vm.stack[vm.sp]
 }
