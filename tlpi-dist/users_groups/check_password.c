@@ -1,23 +1,3 @@
-/*************************************************************************\
-*                  Copyright (C) Michael Kerrisk, 2019.                   *
-*                                                                         *
-* This program is free software. You may use, modify, and redistribute it *
-* under the terms of the GNU General Public License as published by the   *
-* Free Software Foundation, either version 3 or (at your option) any      *
-* later version. This program is distributed without any warranty.  See   *
-* the file COPYING.gpl-v3 for details.                                    *
-\*************************************************************************/
-
-/* Listing 8-2 */
-
-/* check_password.c
-
-   Read a user name and password and check if they are valid.
-
-   This program uses the shadow password file. Some UNIX implementations
-   don't support this feature.
-*/
-/* Compile with -lcrypt */
 #if ! defined(__sun)
 #define _BSD_SOURCE     /* Get getpass() declaration from <unistd.h> */
 #ifndef _XOPEN_SOURCE
@@ -40,26 +20,22 @@ main(int argc, char *argv[])
     size_t len;
     long lnmax;
 
-    /* Determine size of buffer required for a username, and allocate it */
-
     lnmax = sysconf(_SC_LOGIN_NAME_MAX);
-    if (lnmax == -1)                    /* If limit is indeterminate */
-        lnmax = 256;                    /* make a guess */
+    if (lnmax == -1)
+        lnmax = 256;
 
     username = malloc(lnmax);
     if (username == NULL)
         errExit("malloc");
 
     printf("Username: ");
-    fflush(stdout);
+    fflush(stdout); /* Forces all possible data to be written to stdout */
     if (fgets(username, lnmax, stdin) == NULL)
-        exit(EXIT_FAILURE);             /* Exit on EOF */
+        exit(EXIT_FAILURE);
 
     len = strlen(username);
     if (username[len - 1] == '\n')
-        username[len - 1] = '\0';       /* Remove trailing '\n' */
-
-    /* Look up password and shadow password records for username */
+        username[len - 1] = '\0'; // Strip trailing \n
 
     pwd = getpwnam(username);
     if (pwd == NULL)
@@ -68,13 +44,15 @@ main(int argc, char *argv[])
     if (spwd == NULL && errno == EACCES)
         fatal("no permission to read shadow password file");
 
-    if (spwd != NULL)           /* If there is a shadow password record */
-        pwd->pw_passwd = spwd->sp_pwdp;     /* Use the shadow password */
+    if (spwd != NULL)
+        pwd->pw_passwd = spwd->sp_pwdp;
 
     password = getpass("Password: ");
 
-    /* Encrypt password and erase cleartext version immediately */
+    /* Encrypt password and erase cleartext password immediately. */
 
+    // pwd->pw_passwd supplies the salt. It is the two character string at the
+    // beginning.
     encrypted = crypt(password, pwd->pw_passwd);
     for (p = password; *p != '\0'; )
         *p++ = '\0';
@@ -84,13 +62,10 @@ main(int argc, char *argv[])
 
     authOk = strcmp(encrypted, pwd->pw_passwd) == 0;
     if (!authOk) {
-        printf("Incorrect password\n");
-        exit(EXIT_FAILURE);
+        printf("Incorrect password!");
+    } else {
+        printf("Correct password!");
     }
-
-    printf("Successfully authenticated: UID=%ld\n", (long) pwd->pw_uid);
-
-    /* Now do authenticated work... */
 
     exit(EXIT_SUCCESS);
 }

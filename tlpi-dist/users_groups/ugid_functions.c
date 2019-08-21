@@ -25,7 +25,7 @@ userIdFromName(const char *name)
     struct passwd *pwd;
 
     if (name == NULL || *name == '\0')
-        return -1
+        return -1;
 
     pwd = getpwnam(name);
     if (pwd == NULL)
