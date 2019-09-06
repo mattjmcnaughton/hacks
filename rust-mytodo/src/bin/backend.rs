@@ -2,23 +2,24 @@
 
 #[macro_use]
 extern crate rocket;
-#[macro_use]
 extern crate rocket_contrib;
-#[macro_use]
 extern crate serde;
 
+use rocket_contrib::json::Json;
+
 use mytodo::db::{query_task, establish_connection};
+use mytodo::db::models::JsonApiResponse;
 
 #[get("/tasks")]
-fn tasks_get() -> String {
-    let mut response: Vec<String> = vec![];
+fn tasks_get() -> Json<JsonApiResponse> {
+    let mut response = JsonApiResponse { data: vec![], };
 
     let conn = establish_connection();
     for task in query_task(&conn) {
-        response.push(task.title);
+        response.data.push(task);
     }
 
-    response.join("\n")
+    Json(response)
 }
 
 fn main() {
