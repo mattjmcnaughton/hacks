@@ -7,8 +7,8 @@ extern crate serde;
 
 use rocket_contrib::json::Json;
 
-use mytodo::db::{query_task, establish_connection};
-use mytodo::db::models::JsonApiResponse;
+use backend::db::{query_task, establish_connection};
+use backend::db::models::JsonApiResponse;
 
 #[get("/tasks")]
 fn tasks_get() -> Json<JsonApiResponse> {
