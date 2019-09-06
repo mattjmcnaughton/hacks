@@ -2,6 +2,10 @@
 
 #[macro_use]
 extern crate rocket;
+#[macro_use]
+extern crate rocket_contrib;
+#[macro_use]
+extern crate serde;
 
 use mytodo::db::{query_task, establish_connection};
 
