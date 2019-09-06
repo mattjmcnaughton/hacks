@@ -1,5 +1,5 @@
 [package]
-name = "rust-mytodo"
+name = "mytodo"
 version = "0.1.0"
 authors = ["mattjmcnaughton <mattjmcnaughton@gmail.com>"]
 edition = "2018"

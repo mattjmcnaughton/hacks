@@ -1,5 +1,4 @@
 CREATE TABLE task (
-  id INTEGER NOT NULL,
-  title TEXT NOT NULL,
-  PRIMARY KEY (id)
+  id SERIAL PRIMARY KEY,
+  title VARCHAR NOT NULL
 );
