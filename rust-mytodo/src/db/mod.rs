@@ -3,8 +3,8 @@ use diesel::pg::PgConnection;
 use dotenv::dotenv;
 use std::env;
 
-pub mod models;
-pub mod schema;
+mod models;
+mod schema;
 
 pub fn establish_connection() -> PgConnection {
     dotenv().ok();
@@ -22,4 +22,10 @@ pub fn create_task<'a>(connection: &PgConnection, title: &'a str) {
         .values(&task)
         .execute(connection)
         .expect("Error inserting new task");
+}
+
+pub fn query_task(connection: &PgConnection) -> Vec<models::Task> {
+    schema::task::table
+        .load::<models::Task>(&*connection)
+        .expect("Error loading tasks")
 }
