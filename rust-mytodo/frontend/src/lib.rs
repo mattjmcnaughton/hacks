@@ -1,51 +1,55 @@
 #[macro_use]
 extern crate seed;
-use seed::prelude::*;
 
-#[derive(Clone, Debug)]
-enum Direction {
-    Coming,
-    Going,
-}
+use futures::Future;
+use seed::prelude::*;
+use seed::{fetch, Request};
+
+use mytodo::{JsonApiResponse, Task};
 
 struct Model {
-    direction: Direction,
+    tasks: Vec<Task>,
 }
 
 #[derive(Clone, Debug)]
 enum Msg {
-    Click,
+    FetchedTasks(fetch::ResponseDataResult<JsonApiResponse>),
 }
 
-fn update(msg: Msg, model: &mut Model, _orders: &mut impl Orders<Msg>) {
+fn update(msg: Msg, model: &mut Model, orders: &mut impl Orders<Msg>) {
     match msg {
-        Msg::Click => {
-            model.direction = match model.direction {
-                Direction::Coming => Direction::Going,
-                Direction::Going => Direction::Coming,
-            }
+        Msg::FetchedTasks(Ok(mut result)) => {
+            model.tasks.clear();
+            model.tasks.append(&mut result.data);
+        }
+        Msg::FetchedTasks(Err(reason)) => {
+            log!(format!("Error fetching: {:?}", reason));
+            orders.skip();
         }
     }
 }
 
 fn view(model: &Model) -> impl View<Msg> {
-    let greeting = match model.direction {
-        Direction::Coming => "Hello, World!",
-        Direction::Going => "Hasta la vista!",
-    };
+    let tasks: Vec::<Node<Msg>> = model.tasks.iter().map(|t| {
+        li![{t.title.clone()}]
+    }).collect();
+
     h1![
-        class! {"heading"},
-        style!["height" => "100vh",
-               "width" => "100vw",
+        {"Tasks"},
+        ul![
+            tasks,
         ],
-        { greeting },
-        simple_ev(Ev::Click, Msg::Click),
     ]
 }
 
-fn init(_url: Url, _orders: &mut impl Orders<Msg>) -> Model {
+fn fetch_drills() -> impl Future<Item = Msg, Error = Msg> {
+    Request::new("http://localhost:8000/tasks/").fetch_json_data(Msg::FetchedTasks)
+}
+
+fn init(_url: Url, orders: &mut impl Orders<Msg>) -> Model {
+    orders.perform_cmd(fetch_drills());
     Model {
-        direction: Direction::Coming,
+        tasks: vec![],
     }
 }
 

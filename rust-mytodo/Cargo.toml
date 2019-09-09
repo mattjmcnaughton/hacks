@@ -6,3 +6,6 @@ edition = "2018"
 
 [workspace]
 members = ["backend", "frontend"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }

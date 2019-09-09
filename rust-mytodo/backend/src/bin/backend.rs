@@ -6,24 +6,42 @@ extern crate rocket_contrib;
 extern crate serde;
 
 use rocket_contrib::json::Json;
+use rocket_cors::{AllowedHeaders, AllowedOrigins, Error};
 
 use backend::db::{query_task, establish_connection};
-use backend::db::models::JsonApiResponse;
+use mytodo::JsonApiResponse;
 
 #[get("/tasks")]
 fn tasks_get() -> Json<JsonApiResponse> {
     let mut response = JsonApiResponse { data: vec![], };
 
     let conn = establish_connection();
-    for task in query_task(&conn) {
-        response.data.push(task);
+    for db_task in query_task(&conn) {
+        let api_task = mytodo::Task {
+            id: db_task.id,
+            title: db_task.title,
+        };
+        response.data.push(api_task);
     }
 
     Json(response)
 }
 
-fn main() {
+fn main() -> Result<(), Error> {
+    let allowed_origins = AllowedOrigins::all();
+
+    let cors = rocket_cors::CorsOptions {
+        allowed_origins,
+        allowed_headers: AllowedHeaders::some(&["Authorized", "Accept"]),
+        allow_credentials: true,
+        ..Default::default()
+    }
+    .to_cors()?;
+
     rocket::ignite()
         .mount("/", routes![tasks_get])
+        .attach(cors)
         .launch();
+
+    Ok(())
 }
