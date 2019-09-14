@@ -38,6 +38,21 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 		c.emit(code.OpPop)
 
+	case *ast.PrefixExpression:
+		err := c.Compile(node.Right)
+		if err != nil {
+			return err
+		}
+
+		switch node.Operator {
+		case "!":
+			c.emit(code.OpBang)
+		case "-":
+			c.emit(code.OpMinus)
+		default:
+			return fmt.Errorf("Unknown operator %s", node.Operator)
+		}
+
 	case *ast.InfixExpression:
 		// Do "<" operator by flipping the order that we compile the
 		// statements and then using the "<" operator.
