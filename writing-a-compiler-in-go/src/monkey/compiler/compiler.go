@@ -138,8 +138,31 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.removeLastPop()
 		}
 
-		afterConsequencePos := len(c.instructions)
-		c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
+		if node.Alternative == nil {
+			afterConsequencePos := len(c.instructions)
+			c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
+		} else {
+			// @TODO There's a decent amount of code duplication
+			// here that we want to clean up.
+
+			// Emit a `OpJump` over the else block.
+			jumpPos := c.emit(code.OpJump, 9999)
+
+			afterConsequencePos := len(c.instructions)
+			c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
+
+			err := c.Compile(node.Alternative)
+			if err != nil {
+				return err
+			}
+
+			if c.lastInstructionIsPop() {
+				c.removeLastPop()
+			}
+
+			afterAlternativePos := len(c.instructions)
+			c.changeOperand(jumpPos, afterAlternativePos)
+		}
 
 	case *ast.IntegerLiteral:
 		integer := &object.Integer{Value: node.Value}
