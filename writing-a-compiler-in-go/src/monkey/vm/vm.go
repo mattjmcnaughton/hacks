@@ -17,9 +17,10 @@ type VM struct {
 	sp    int // Always points to the next value. Top of stack is stack[sp-1]
 }
 
-// Reuse global true/false values
+// Reuse global true/false/null values
 var True = &object.Boolean{Value: true}
 var False = &object.Boolean{Value: false}
+var Null = &object.Null{}
 
 func New(bytecode *compiler.Bytecode) *VM {
 	return &VM{
@@ -105,8 +106,13 @@ func (vm *VM) Run() error {
 			if !isTruthy(condition) {
 				ip = pos - 1
 			}
-		}
 
+		case code.OpNull:
+			err := vm.push(Null)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
@@ -222,6 +228,9 @@ func isTruthy(obj object.Object) bool {
 	case *object.Boolean:
 		return obj.Value
 
+	case *object.Null:
+		return false
+
 	default:
 		return true
 	}
@@ -234,6 +243,8 @@ func (vm *VM) executeBangOperator() error {
 	case True:
 		return vm.push(False)
 	case False:
+		return vm.push(True)
+	case Null:
 		return vm.push(True)
 	default:
 		return vm.push(False)
