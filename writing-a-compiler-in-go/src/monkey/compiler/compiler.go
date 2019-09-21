@@ -13,6 +13,8 @@ type Compiler struct {
 
 	lastInstruction     EmittedInstruction
 	previousInstruction EmittedInstruction
+
+	symbolTable *SymbolTable
 }
 
 type EmittedInstruction struct {
@@ -26,6 +28,7 @@ func New() *Compiler {
 		constants:           []object.Object{},
 		lastInstruction:     EmittedInstruction{},
 		previousInstruction: EmittedInstruction{},
+		symbolTable:         NewSymbolTable(),
 	}
 }
 
@@ -55,6 +58,17 @@ func (c *Compiler) Compile(node ast.Node) error {
 				return err
 			}
 		}
+
+	case *ast.LetStatement:
+		err := c.Compile(node.Value)
+		if err != nil {
+			return err
+		}
+
+		symbol := c.symbolTable.Define(node.Name.Value)
+		// Each symbol has an index... our vm will store variable values
+		// at that index.
+		c.emit(code.OpSetGlobal, symbol.Index)
 
 	case *ast.PrefixExpression:
 		err := c.Compile(node.Right)
@@ -159,6 +173,15 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		afterAlternativePos := len(c.instructions)
 		c.changeOperand(jumpPos, afterAlternativePos)
+
+	case *ast.Identifier:
+		symbol, ok := c.symbolTable.Resolve(node.Value)
+		if !ok {
+			return fmt.Errorf("undefined variable %s", node.Value)
+		}
+
+		// Retrieve the global based on the symbol index
+		c.emit(code.OpGetGlobal, symbol.Index)
 
 	case *ast.IntegerLiteral:
 		integer := &object.Integer{Value: node.Value}
