@@ -32,6 +32,13 @@ func New() *Compiler {
 	}
 }
 
+func NewWithState(s *SymbolTable, constants []object.Object) *Compiler {
+	compiler := New()
+	compiler.symbolTable = s
+	compiler.constants = constants
+	return compiler
+}
+
 // Compile updates the internal `instructions` array with the bytecode
 // representation of the instructions.
 func (c *Compiler) Compile(node ast.Node) error {
