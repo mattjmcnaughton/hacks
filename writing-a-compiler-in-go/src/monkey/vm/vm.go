@@ -190,6 +190,39 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+
+		case code.OpCall:
+			// A compiled function should be on the top of the stack
+			// when we issues `OpCall`.
+			fn, ok := vm.stack[vm.sp-1].(*object.CompiledFunction)
+			if !ok {
+				return fmt.Errorf("calling non-function")
+			}
+			frame := NewFrame(fn)
+			vm.pushFrame(frame)
+
+		case code.OpReturnValue:
+			// Pop the return value off the stack.
+			returnValue := vm.pop()
+
+			vm.popFrame()
+			// Pop the function we just called off the stack.
+			vm.pop()
+
+			// Put the return value back on the stack.
+			err := vm.push(returnValue)
+			if err != nil {
+				return err
+			}
+
+		case code.OpReturn:
+			vm.popFrame()
+			vm.pop()
+
+			err := vm.push(Null)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
