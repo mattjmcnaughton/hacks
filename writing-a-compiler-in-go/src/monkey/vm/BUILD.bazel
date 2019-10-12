@@ -1,0 +1,29 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "frame.go",
+        "vm.go",
+    ],
+    importpath = "monkey/vm",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//code:go_default_library",
+        "//compiler:go_default_library",
+        "//object:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["vm_test.go"],
+    embed = [":go_default_library"],
+    deps = [
+        "//ast:go_default_library",
+        "//compiler:go_default_library",
+        "//lexer:go_default_library",
+        "//object:go_default_library",
+        "//parser:go_default_library",
+    ],
+)

@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+load("@bazel_gazelle//:def.bzl", "gazelle")
+
+# gazelle:prefix monkey
+gazelle(name = "gazelle")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["main.go"],
+    importpath = "monkey",
+    visibility = ["//visibility:private"],
+    deps = ["//repl:go_default_library"],
+)
+
+go_binary(
+    name = "monkey",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,15 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["repl.go"],
+    importpath = "monkey/repl",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//compiler:go_default_library",
+        "//lexer:go_default_library",
+        "//object:go_default_library",
+        "//parser:go_default_library",
+        "//vm:go_default_library",
+    ],
+)
