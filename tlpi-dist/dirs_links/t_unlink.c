@@ -28,8 +28,8 @@ int
 main(int argc, char *argv[])
 {
     int fd, j, numBlocks;
-    char shellCmd[CMD_SIZE];            /* Command to be passed to system() */
-    char buf[BUF_SIZE];                 /* Random bytes to write to file */
+    char shellCmd[CMD_SIZE]; // Command to be passed to `system()`
+    char buf[BUF_SIZE]; // Random bytes to write to the file.
 
     if (argc < 2 || strcmp(argv[1], "--help") == 0)
         usageErr("%s temp-file [num-1kB-blocks] \n", argv[0]);
@@ -37,37 +37,31 @@ main(int argc, char *argv[])
     numBlocks = (argc > 2) ? getInt(argv[2], GN_GT_0, "num-1kB-blocks")
                            : 100000;
 
-    /* O_EXCL so that we ensure we create a new file */
-
+    // Use O_EXCL to ensure we create a new file... i.e. call will fail if the
+    // file exists.
     fd = open(argv[1], O_WRONLY | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
     if (fd == -1)
         errExit("open");
 
-    if (unlink(argv[1]) == -1)          /* Remove filename */
+    // Remove file name... won't be deleted until the file descriptor is closed.
+    if (unlink(argv[1]) == -1)
         errExit("unlink");
 
-    for (j = 0; j < numBlocks; j++)     /* Write lots of junk to file */
+    for (j = 0; j < numBlocks; j++) {
+        // Write lots of junk to the file.
         if (write(fd, buf, BUF_SIZE) != BUF_SIZE)
             fatal("partial/failed write");
+    }
 
+    // Write formatted output to sized buffer.
     snprintf(shellCmd, CMD_SIZE, "df -k `dirname %s`", argv[1]);
-    system(shellCmd);                   /* View space used in file system */
+    // run the shell cmd
+    system(shellCmd);
 
-    if (close(fd) == -1)                /* File is now destroyed */
+    if (close(fd) == -1)
         errExit("close");
-    printf("********** Closed file descriptor\n");
+    printf("***** Closed file descriptor\n");
 
-    /* See the erratum for page 348 at http://man7.org/tlpi/errata/.
-       Depending on factors such as random scheduler decisions and the
-       size of the file created, the 'df' command executed by the second
-       system() call below does may not show a change in the amount
-       of disk space consumed, because the blocks of the closed file
-       have not yet been freed by the kernel. If this is the case,
-       then inserting a sleep(1) call here should be sufficient to
-       ensure that the the file blocks have been freed by the time
-       of the second 'df' command.
-    */
-
-    system(shellCmd);                   /* Review space used in file system */
+    system(shellCmd);
     exit(EXIT_SUCCESS);
 }
