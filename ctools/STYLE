@@ -1,0 +1,67 @@
+ctools is written in a style which approximates Linux kernel style.
+
+Opening braces go on the same line, except for function definitions, and are
+mandatory in cases where C99 permits their omission (e.g. one-line if
+statements).
+
+	if (cond) {
+		...
+	}
+
+	while (cond) {
+		...
+	}
+
+Functions are defined as such:
+
+	return type
+	name(parameters...)
+	{
+		body
+	}
+
+This enables them to be easily found with `grep -Rn '^name' .`
+
+Pointer types are defined with the * placed with the identifier:
+
+	char *foobar;
+
+Spaces are placed around binary operators, but not unary:
+
+	int x = y * (2 + z);
+	do_work(x, +y, -z);
+
+The use of macros is not permitted.
+
+Comments should use /* multi-line style */ even for single-line comments.
+
+#include statements at the top of the file are to organized by locality (<>
+first, then ""), then alphabetized.
+
+The line length limit is 80 columns. Tabs are 8 columns wide. Identation with
+spaces is not used.
+
+When breaking a statement onto several lines, indent the subsequent lines once.
+If the statement declares a block, indent twice instead;
+
+	int x = 100,
+		y = 200,
+		z = 300;
+
+	if (x == 100 && y == 200
+			&& z == 300) {
+		do_work(x, y, z);
+	}
+
+Hexadecimal literals should be written in uppercase: 0xDEADBEEF.
+
+Align case statements with the switch statement they belong to:
+
+	switch (x) {
+	case 10:
+		do_work(x);
+		break;
+	case 20:
+		do_work(x);
+		break;
+	}

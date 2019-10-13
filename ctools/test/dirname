@@ -1,0 +1,56 @@
+#!/bin/sh
+tool="dirname"
+. "$HARNESS"
+
+should_handle_null_string() (
+	dn="$(dirname '')"
+	[ "$dn" = "." ]
+)
+
+should_handle_single_slash() (
+	dn="$(dirname '/')"
+	[ "$dn" = "/" ]
+)
+
+should_handle_double_slash() (
+	dn="$(dirname '//')"
+	[ "$dn" = "/" ] || [ "$dn" = "//" ]
+)
+
+should_handle_trailing_slash() (
+	dn="$(dirname 'foo/')"
+	[ "$dn" = "." ]
+)
+
+should_handle_no_slash() (
+	dn="$(dirname 'foo')"
+	[ "$dn" = "." ]
+)
+
+should_handle_double_slashes() (
+	dn="$(dirname '//foo//bar//')"
+	[ "$dn" = "//foo" ]
+)
+
+should_handle_leading_slash() (
+	dn="$(dirname '/foo')"
+	[ "$dn" = "/" ]
+)
+
+should_handle_dirname() (
+	dn="$(dirname 'foo/bar/baz')"
+	[ "$dn" = "foo/bar" ]
+)
+
+should_handle_ddash dirname foo/bar/
+
+runtests \
+	should_handle_ddash \
+	should_handle_null_string \
+	should_handle_single_slash \
+	should_handle_double_slash \
+	should_handle_trailing_slash \
+	should_handle_no_slash \
+	should_handle_double_slashes \
+	should_handle_leading_slash \
+	should_handle_dirname

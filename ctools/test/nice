@@ -1,0 +1,20 @@
+#!/bin/sh
+tool="cmp"
+. "$HARNESS"
+
+should_set_niceness() {
+	if [ "$(uname)" != "Linux" ]
+	then
+		printf "SKIP(requires Linux) "
+		return
+	fi
+	o="$(cat /proc/self/stat | cut -d ' ' -f19)"
+	n="$(nice -n 5 cat /proc/self/stat | cut -d' ' -f19)"
+	[ $((n-o)) -eq 5 ]
+}
+
+should_handle_ddash nice true
+
+runtests \
+	should_handle_ddash \
+	should_set_niceness

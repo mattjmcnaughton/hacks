@@ -1,0 +1,25 @@
+#!/bin/sh
+tool="head"
+. "$HARNESS"
+
+should_read_from_stdin() (
+	[ "$(echo Test Statement | head)" = "Test Statement" ]
+)
+
+should_print_10_from_stdin() (
+	[ $(largefile | head | wc -l) -eq 10 ]
+)
+
+should_handle_largefile_from_stdin() (
+	[ $(largefile | head -n 200 | wc -l) -eq 200 ]
+)
+
+should_handle_non_existent_file() (
+	[ ! $(head inexistantfile) ]
+)
+
+runtests \
+	should_read_from_stdin \
+	should_handle_non_existent_file \
+	should_print_10_from_stdin \
+	should_handle_largefile_from_stdin

@@ -1,0 +1,58 @@
+#!/bin/sh
+tool=env
+. "$HARNESS"
+
+export FOO=bar
+export BAZ=quux
+
+echo ls > "$TMPDIR"/test-script
+
+should_clear_env() (
+	ev="$(env -i)"
+	[ -z "$ev" ]
+)
+
+should_print_env() (
+	ev="$(env | grep '^FOO')"
+	[ "$ev" = "FOO=bar" ]
+	ev="$(env | grep '^BAZ')"
+	[ "$ev" = "BAZ=quux" ]
+)
+
+should_invoke_cmd() (
+	ev="$(env basename a/b/c.d)"
+	[ "$ev" = "c.d" ]
+)
+
+should_invoke_cmd_clean_env() (
+	ev=$(env -i BAR=foo env)
+	[ "$ev" = "BAR=foo" ]
+)
+
+should_invoke_cmd_with_options() (
+	ev=$(largefile | env -i PATH="$PATH" head -n 15)
+	largefile_head=$(largefile | head -n 15)
+	[ "$ev" = "$largefile_head" ]
+)
+
+should_fail_127() (
+	ev="$(env program-does-not-exist 2> /dev/null)"
+	[ $? = 127 ] && [ -z "$ev" ]
+)
+
+should_fail_126() (
+	ev="$(env "$TMPDIR"/test-script 2> /dev/null)"
+	[ $? = 126 ] && [ -z "$ev" ]
+)
+
+should_handle_ddash env cat /dev/null
+
+runtests \
+	should_handle_ddash \
+	should_clear_env \
+	should_print_env \
+	should_invoke_cmd \
+	should_invoke_cmd_clean_env \
+	should_invoke_cmd_with_options \
+	should_fail_127 \
+	should_fail_126

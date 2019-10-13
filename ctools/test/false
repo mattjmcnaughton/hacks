@@ -1,0 +1,15 @@
+#!/bin/sh
+tool="false"
+. "$HARNESS"
+
+should_return_nonzero() {
+	! false
+}
+
+should_return_nonzero_w_flags() {
+	! false -a 123 foobar
+}
+
+runtests \
+	should_return_nonzero \
+	should_return_nonzero_w_flags

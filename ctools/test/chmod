@@ -1,0 +1,132 @@
+#!/bin/sh
+tool="chmod"
+. "$HARNESS"
+
+# TODO:
+# - setuid/setguid/sticky
+# - a+X behavior
+
+assert_mode() (
+	mode="$1"
+	shift
+	for path in $*
+	do
+		dir="$(dirname "$path")"
+		base="$(basename "$path")"
+		if [ "$(find "$dir" -name "$base" -perm "$mode")" != "$path" ]
+		then
+			printf "(%s:mode != %o) " "$path" "$mode"
+			return 1
+		fi
+	done
+)
+
+should_handle_octal_modes() (
+	f="$TMPDIR"/octal
+	touch $f
+	i=0
+	while [ $i -le 511 ] # 0777 == 511
+	do
+		oct=$(printf '%o' $i)
+		chmod $oct "$f" || return 1
+		assert_mode $oct "$f" || return 1
+		i=$((i+1))
+	done
+	rm $f
+)
+
+octtodec() {
+	oct=$1
+	awk 'BEGIN { printf "%d\n", '"0$oct"' }'
+}
+
+# should_handle_syms op baseline expected_result_fn
+should_handle_syms() (
+	op="$1"
+	base="$2"
+	check="$3"
+
+	f="$TMPDIR"/symbolic
+	touch "$f"
+
+	cat >"$TMPDIR"/map <<-EOF
+	x 111
+	w 222
+	r 444
+	wx 333
+	xw 333
+	rx 555
+	xr 555
+	rw 666
+	wr 666
+	rwx 777
+	EOF
+
+	cat "$TMPDIR"/map | while read testcase
+	do
+		mask=7
+		for who in u:7 g:70 o:700 ug:77 uo:707 go:770 ugo:777
+		do
+			mask=$(echo "$who" | cut -d: -f2)
+			mask=$(octtodec $mask)
+			who=$(echo "$who" | cut -d: -f1)
+
+			sym=$(echo "$testcase" | cut -d' ' -f1)
+			oct=$(echo "$testcase" | cut -d' ' -f2)
+			dec=$(octtodec $oct)
+			dec=$((dec&mask))
+			oct=$(printf '%o' $dec)
+
+			chmod $base "$f"
+
+			chmod ${who}${op}${sym} "$f" || return 1
+			assert_mode "$(printf '%o' $($check $dec))" "$f" || return 1
+
+			mask=$((mask<<3))
+		done
+	done
+	ret=$?
+
+	rm "$TMPDIR"/map
+	chmod 644 "$f"
+	#rm "$f"
+
+	return $ret
+)
+
+should_handle_add_syms() (
+	should_handle_syms + 000 echo
+)
+
+expected_rem() (
+	dec="$1"
+	echo $((511-dec))
+)
+
+should_handle_rem_syms() (
+	should_handle_syms - 777 expected_rem
+)
+
+expected_clear() {
+	dec="$1"
+	dec=$((~dec))
+	echo $((511&dec))
+}
+
+should_handle_clear_syms() (
+	should_handle_syms = 777 expected_clear
+)
+
+should_handle_recursive() (
+	mkdir -p "$TMPDIR"/recursive/foo/bar
+	touch "$TMPDIR"/recursive/foo/bar/baz
+	chmod -R 777 "$TMPDIR"/recursive
+	assert_mode 777 "$TMPDIR"/recursive/foo/bar/baz
+)
+
+runtests \
+	should_handle_recursive \
+	should_handle_octal_modes \
+	should_handle_add_syms \
+	should_handle_rem_syms \
+	should_handle_clear_syms

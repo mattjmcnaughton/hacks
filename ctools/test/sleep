@@ -1,0 +1,18 @@
+#!/bin/sh
+tool="true"
+. "$HARNESS"
+
+should_return_zero() {
+	sleep 1
+}
+
+should_return_error() {
+	if ! sleep hans; then
+		return 0
+	fi
+	return 1
+}
+
+runtests \
+	should_return_zero \
+	should_return_error

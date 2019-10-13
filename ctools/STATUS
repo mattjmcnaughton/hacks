@@ -1,0 +1,169 @@
+T TODO
+D DONE
+W WON'T IMPLEMENT (Out of scope)
+N NON-APPLICABLE (Shell builtins)
+
+T D W N
+-------
+    W   admin
+      N alias
+    W   ar
+    W   asa
+T       at*
+T       awk
+  D     basename
+T       batch*
+T       bc
+      N bg
+    W   c99
+T       cal
+  D     cat
+      N cd
+    W   cflow
+  D     chgrp
+  D     chmod
+  D     chown
+  D     cksum
+  D     cmp
+  D     comm
+      N command
+    W   compress
+T       cp
+T       crontab*
+T       csplit
+    W   ctags
+T       cut
+    W   cxref
+T       date
+T       dd
+    W   delta
+T       df
+T       diff
+  D     dirname
+T       du
+T       echo
+T       ed*
+  D     env
+    W   ex
+T       expand
+T       expr
+  D     false
+      N fc
+      N fg
+    W   file
+T       find
+T       fold
+    W   fort77
+T       fuser
+T       gencat
+    W   get
+T       getconf
+    W   getopts
+T       grep
+T       hash
+  D     head
+    W   iconv
+T       id
+T       ipcrm*
+T       ipcs*
+    W   jobs
+T       join
+T       kill
+    W   lex
+  D     link
+T       ln
+T       locale
+T       localedef
+T       logger
+  D     logname
+    W   lp
+T       ls
+T       m4
+    W   mailx
+T       make*
+    W   man
+T       mesg
+T       mkdir
+T       mkfifo
+    W   more
+T       mv
+T       newgrp
+  D     nice
+T       nl
+    W   nm
+T       nohup
+T       od
+T       paste
+T       patch
+T       pathchk
+    W   pax
+    W   pr
+T       printf
+    W   prs
+T       ps
+T       pwd
+    W   qalter
+    W   qdel
+    W   qhold
+    W   qmove
+    W   qmsg
+    W   qrerun
+    W   qrls
+    W   qselect
+    W   qsig
+    W   qstat
+    W   qsub
+      N read
+T       renice
+T       rm
+    W   rmdel
+  D     rmdir
+    W   sact
+    W   sccs
+T       sed
+      N sh
+  D     sleep
+T       sort
+T       split
+T       strings
+    W   strip
+T       stty
+T       tabs
+T       tail
+    W   talk
+T       tee
+T       test
+T       time
+T       touch
+T       tput
+T       tr
+  D     true
+T       tsort
+  D     tty
+      N type
+      N ulimit
+      N umask
+      N unalias
+  D     uname
+    W   uncompress
+T       unexpand
+    W   unget
+T       uniq
+  D     unlink
+    W   uucp
+T       uudecode
+T       uuencode
+    W   uustat
+    W   uux
+    W   val
+    W   vi
+      N wait
+T       wc
+      N what
+    W   who
+    W   write
+T       xargs
+    W   yacc
+    W   zcat
+
+* optional

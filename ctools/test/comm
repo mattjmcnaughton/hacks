@@ -1,0 +1,160 @@
+#!/bin/sh
+tool="comm"
+. "$HARNESS"
+
+compare_with_ref() (
+	ref=$(cat "$TMPDIR"/"$1")
+	ref_sum=$(printf '%s' "$ref" | cksum)
+	shift
+	(
+		cd "$TMPDIR"
+		actual=$(comm "$@")
+		actual_sum=$(printf '%s' "$actual" | cksum)
+		if [ "$ref_sum" != "$actual_sum" ]
+		then
+			printf 'Args: %s\nExpected:\n%s\nActual:\n%s\n' \
+				"$*" "$ref" "$actual"
+			return 1
+		fi
+	)
+)
+
+cat >"$TMPDIR"/case_a <<EOF
+1 same line
+2 same line
+3 different line A
+4 different line A
+5 same line
+EOF
+
+cat >"$TMPDIR"/case_b <<EOF
+1 same line
+2 same line
+3 different line B
+4 different line B
+5 same line
+EOF
+
+cat >"$TMPDIR"/ref_ab_noflags <<EOF
+		1 same line
+		2 same line
+3 different line A
+	3 different line B
+4 different line A
+	4 different line B
+		5 same line
+EOF
+
+should_handle_samelength() (
+	compare_with_ref ref_ab_noflags case_a case_b
+)
+
+cat >"$TMPDIR"/ref_ab_1 <<EOF
+	1 same line
+	2 same line
+3 different line B
+4 different line B
+	5 same line
+EOF
+
+cat >"$TMPDIR"/ref_ab_2 <<EOF
+	1 same line
+	2 same line
+3 different line A
+4 different line A
+	5 same line
+EOF
+
+cat >"$TMPDIR"/ref_ab_3 <<EOF
+3 different line A
+	3 different line B
+4 different line A
+	4 different line B
+EOF
+
+cat >"$TMPDIR"/ref_ab_12 <<EOF
+1 same line
+2 same line
+5 same line
+EOF
+
+cat >"$TMPDIR"/ref_ab_13 <<EOF
+3 different line B
+4 different line B
+EOF
+
+cat >"$TMPDIR"/ref_ab_23 <<EOF
+3 different line A
+4 different line A
+EOF
+
+should_handle_flags() (
+	compare_with_ref ref_ab_1 -1 -- case_a case_b || return 1
+	compare_with_ref ref_ab_2 -2 case_a case_b || return 1
+	compare_with_ref ref_ab_3 -3 -- case_a case_b || return 1
+	compare_with_ref ref_ab_12 -12 case_a case_b || return 1
+	compare_with_ref ref_ab_13 -13 -- case_a case_b || return 1
+	compare_with_ref ref_ab_23 -23 case_a case_b || return 1
+)
+
+cat >"$TMPDIR"/case_c <<EOF
+1 same line
+2 same line
+3 different line A
+4 different line A
+5 same line
+6 extra line 1
+7 extra line 2
+EOF
+
+cat >"$TMPDIR"/case_d <<EOF
+1 same line
+2 same line
+3 different line B
+4 different line B
+5 same line
+EOF
+
+cat >"$TMPDIR"/ref_cd <<EOF
+		1 same line
+		2 same line
+3 different line A
+	3 different line B
+4 different line A
+	4 different line B
+		5 same line
+6 extra line 1
+7 extra line 2
+EOF
+
+cat >"$TMPDIR"/ref_cd_reverse <<EOF
+		1 same line
+		2 same line
+	3 different line A
+3 different line B
+	4 different line A
+4 different line B
+		5 same line
+	6 extra line 1
+	7 extra line 2
+EOF
+
+should_handle_difflen() (
+	compare_with_ref ref_cd case_c case_d || return 1
+	compare_with_ref ref_cd_reverse case_d case_c || return 1
+)
+
+should_handle_stdin() (
+	ref=$(cksum <"$TMPDIR"/ref_ab_noflags)
+	actual=$(comm "$TMPDIR"/case_a - <"$TMPDIR"/case_b | cksum)
+	[ "$ref" = "$actual" ] || return 1
+	ref=$(cksum <"$TMPDIR"/ref_ab_noflags)
+	actual=$(comm - "$TMPDIR"/case_b <"$TMPDIR"/case_a | cksum)
+	[ "$ref" = "$actual" ] || return 1
+)
+
+runtests \
+	should_handle_samelength \
+	should_handle_flags \
+	should_handle_difflen \
+	should_handle_stdin

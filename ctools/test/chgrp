@@ -1,0 +1,183 @@
+#!/bin/sh
+tool="chgrp"
+. "$HARNESS"
+
+auxgroup=${AUXGROUP:-}
+maingroup="$(id -gn)"
+for grp in $(id -Gn)
+do
+	if [ $grp != "$maingroup" ]
+	then
+		auxgroup=$grp
+		break
+	fi
+done
+[ -z "$auxgroup" ] && ! echo "Unable to select auxillary group for testing" >&2
+
+assert_grp() (
+	grp="$1"
+	shift
+	for path in $*
+	do
+		dir="$(dirname "$path")"
+		base="$(basename "$path")"
+		if [ "$(find "$dir" -name "$base" -group "$grp")" != "$path" ]
+		then
+			printf "(%s:group != %s) " "$path" "$grp"
+			return 1
+		fi
+	done
+)
+
+should_handle_simple() (
+	path="$TMPDIR"/simple
+	touch "$path"
+	assert_grp "$maingroup" "$path" || return 1
+	chgrp "$auxgroup" "$path" || return 1
+	assert_grp "$auxgroup" "$path" || return 1
+)
+
+should_handle_mutex_options() (
+	! chgrp -hR "$auxgroup" "$TMPDIR" 2>/dev/null
+)
+
+should_handle_several() (
+	path_1="$TMPDIR"/several-1
+	path_2="$TMPDIR"/several-2
+	touch "$path_1" "$path_2"
+	assert_grp "$maingroup" "$path_1" "$path_2" || return 1
+	chgrp "$auxgroup" "$path_1" "$path_2" || return 1
+	assert_grp "$auxgroup" "$path_1" "$path_2" || return 1
+)
+
+should_handle_recursive() (
+	mkdir -p "$TMPDIR"/recursive/subdir
+	path_1="$TMPDIR"/recursive/recursive-1
+	path_2="$TMPDIR"/recursive/subdir/recursive-2
+	touch "$path_1" "$path_2"
+
+	assert_grp "$maingroup" "$path_1" "$path_2" || return 1
+	chgrp -R "$auxgroup" "$TMPDIR"/recursive || return 1
+	assert_grp "$auxgroup" "$path_1" "$path_2" || return 1
+)
+
+should_handle_recursive_Hflag() (
+	# -H: If the -R option is specified and a symbolic link referencing a
+	# file of type directory is specified on the command line, chgrp shall
+	# change the group of the directory referenced by the symbolic link and
+	# all files in the file hierarchy below it.
+	dir_1="$TMPDIR"/recursive_hflag
+	dir_2="$TMPDIR"/recursive_hflag2
+	dir_3="$TMPDIR"/recursive_hflag3
+	path_1="$dir_1"/file1
+	path_2="$dir_2"/file2
+	path_3="$dir_3"/file3
+	explicit_link="$dir_1"/explicit
+	implicit_link="$dir_1"/implicit
+	mkdir -p "$dir_1" "$dir_2" "$dir_3"
+	ln -s "$dir_2" "$explicit_link"
+	ln -s "$dir_3" "$implicit_link"
+	touch "$path_1" "$path_2" "$path_3"
+
+	# Assert that initial state matches expectations
+	assert_grp "$maingroup" "$path_1" "$path_2" "$path_3" \
+		"$dir_1" "$dir_2" "$dir_3" \
+		"$explicit_link" "$implicit_link" || return 1
+
+	# If repeated, the last -HLP option is effective
+	chgrp -RHLPH "$auxgroup" "$dir_1" "$explicit_link" || return 1
+
+	# Explicit link target and children updated
+	assert_grp "$auxgroup" "$path_1" "$path_2" "$dir_2" || return 1
+	# Explicit link unchanged
+	assert_grp "$maingroup" "$explicit_link" || return 1
+	# Implicit link target updated
+	assert_grp "$auxgroup" "$dir_3" || return 1
+	# Implicit link children unchanged
+	assert_grp "$maingroup" "$path_3" || return 1
+	# Implicit link unchanged
+	assert_grp "$maingroup" "$implicit_link" || return 1
+)
+
+should_handle_recursive_Lflag() (
+	# -L: If the -R option is specified and a symbolic link referencing a
+	# file of type directory is specified on the command line or
+	# encountered during the traversal of a file hierarchy, chgrp shall
+	# change the group of the directory referenced by the symbolic link and
+	# all files in the file hierarchy below it.
+	dir_1="$TMPDIR"/recursive_lflag
+	dir_2="$TMPDIR"/recursive_lflag2
+	dir_3="$TMPDIR"/recursive_lflag3
+	path_1="$dir_1"/file1
+	path_2="$dir_2"/file2
+	path_3="$dir_3"/file3
+	explicit_link="$dir_1"/explicit
+	implicit_link="$dir_1"/implicit
+	mkdir -p "$dir_1" "$dir_2" "$dir_3"
+	ln -s "$dir_2" "$explicit_link"
+	ln -s "$dir_3" "$implicit_link"
+	touch "$path_1" "$path_2" "$path_3"
+
+	# Assert that initial state matches expectations
+	assert_grp "$maingroup" "$path_1" "$path_2" "$path_3" \
+		"$dir_1" "$dir_2" "$dir_3" \
+		"$explicit_link" "$implicit_link" || return 1
+
+	# If repeated, the last -HLP option is effective
+	chgrp -RHLPL "$auxgroup" "$dir_1" "$explicit_link" || return 1
+
+	# Explicit link target and children updated
+	assert_grp "$auxgroup" "$path_1" "$path_2" "$dir_2" || return 1
+	# Explicit link unchanged
+	assert_grp "$maingroup" "$explicit_link" || return 1
+	# Implicit link target and children updated
+	assert_grp "$auxgroup" "$path_3" "$dir_3" || return 1
+	# Implicit link unchanged
+	assert_grp "$maingroup" "$implicit_link" || return 1
+)
+
+should_handle_recursive_Pflag() (
+	# -P: If the -R option is specified and a symbolic link is specified on
+	# the command line or encountered during the traversal of a file
+	# hierarchy, chgrp shall change the group ID of the symbolic link. The
+	# chgrp utility shall not follow the symbolic link to any other part of
+	# the file hierarchy.
+	dir_1="$TMPDIR"/recursive_pflag
+	dir_2="$TMPDIR"/recursive_pflag2
+	dir_3="$TMPDIR"/recursive_pflag3
+	path_1="$dir_1"/file1
+	path_2="$dir_2"/file2
+	path_3="$dir_3"/file3
+	explicit_link="$dir_1"/explicit
+	implicit_link="$dir_1"/implicit
+	mkdir -p "$dir_1" "$dir_2" "$dir_3"
+	ln -s "$dir_2" "$explicit_link"
+	ln -s "$dir_3" "$implicit_link"
+	touch "$path_1" "$path_2" "$path_3"
+
+	# Assert that initial state matches expectations
+	assert_grp "$maingroup" "$path_1" "$path_2" "$path_3" \
+		"$dir_1" "$dir_2" "$dir_3" \
+		"$explicit_link" "$implicit_link" || return 1
+
+	# If repeated, the last -HLP option is effective
+	chgrp -RHLPP "$auxgroup" "$dir_1" "$explicit_link" || return 1
+
+	# Explicit link target and children updated
+	assert_grp "$auxgroup" "$path_1" || return 1
+	# Explicit link updated
+	assert_grp "$auxgroup" "$explicit_link" || return 1
+	# Implicit link target and children unchanged
+	assert_grp "$maingroup" "$dir_2" "$path_2" "$path_3" "$dir_3" || return 1
+	# Implicit link updated
+	assert_grp "$auxgroup" "$implicit_link" || return 1
+)
+
+runtests \
+	should_handle_simple \
+	should_handle_several \
+	should_handle_mutex_options \
+	should_handle_recursive \
+	should_handle_recursive_Hflag \
+	should_handle_recursive_Lflag \
+	should_handle_recursive_Pflag

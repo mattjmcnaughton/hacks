@@ -1,0 +1,14 @@
+#!/bin/sh
+tool="link"
+. "$HARNESS"
+
+should_make_link() {
+	echo "hello world" >"$TMPDIR"/foo
+	link "$TMPDIR"/foo "$TMPDIR"/bar
+	[ "$(cat "$TMPDIR"/bar)" = "hello world" ]
+	link -- "$TMPDIR"/foo "$TMPDIR"/baz
+	[ "$(cat "$TMPDIR"/baz)" = "hello world" ]
+}
+
+runtests \
+	should_make_link

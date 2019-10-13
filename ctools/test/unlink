@@ -1,0 +1,15 @@
+#!/bin/sh
+tool="unlink"
+. "$HARNESS"
+
+should_remove_link() {
+	touch "$TMPDIR"/file
+	link "$TMPDIR"/file "$TMPDIR"/hardlink
+	unlink "$TMPDIR"/hardlink
+	[ -e "$TMPDIR"/file ] && ! [ -e "$TMPDIR"/hardlink ] || return 1
+	unlink -- "$TMPDIR"/file
+	! [ -e "$TMPDIR"/file ]
+}
+
+runtests \
+	should_remove_link

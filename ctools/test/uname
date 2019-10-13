@@ -1,0 +1,94 @@
+#!/bin/sh
+tool="uname"
+. "$HARNESS"
+
+sysname() {
+	cat /proc/sys/kernel/ostype
+}
+
+hostname() {
+	cat /proc/sys/kernel/hostname
+}
+
+release() {
+	cat /proc/sys/kernel/osrelease
+}
+
+version() {
+	cat /proc/sys/kernel/version
+}
+
+should_print_name() {
+	if ! [ -e /proc/version ]
+	then
+		printf "SKIP(requires Linux) "
+		return
+	fi
+	[ "$(uname)" = "$(sysname)" ] && [ "$(uname -s)" = "$(sysname)" ]
+}
+
+should_print_release() {
+	if ! [ -e /proc/version ]
+	then
+		printf "SKIP(requires Linux) "
+		return
+	fi
+	[ "$(uname -r)" = "$(release)" ]
+}
+
+should_print_hostname() {
+	if ! [ -e /proc/version ]
+	then
+		printf "SKIP(requires Linux) "
+		return
+	fi
+	[ "$(uname -n)" = "$(hostname)" ]
+}
+
+should_print_version() {
+	if ! [ -e /proc/version ]
+	then
+		printf "SKIP(requires Linux) "
+		return
+	fi
+	[ "$(uname -v)" = "$(version)" ]
+}
+
+should_print_arch() {
+	if [ -z "${ARCH:-}" ]
+	then
+		echo 'SKIP($ARCH undefined) '
+		return
+	fi
+	[ "$(uname -m)" = "$ARCH" ]
+}
+
+should_print_everything() {
+	if [ -z "${ARCH:-}" ] || ! [ -e /proc/version ]
+	then
+		echo 'SKIP($ARCH undefined and/or non-Linux host) '
+		return
+	fi
+	# Additional implementation-defined symbols may be written; all such
+	# symbols shall be written at the end of the line of output before the
+	# <newline>.
+	case "$(uname -a)" in
+		"$(sysname) $(hostname) $(release) $(version) $ARCH"*)
+			return
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
+should_handle_ddash uname
+
+runtests \
+	should_handle_ddash \
+	should_print_name \
+	should_print_release \
+	should_print_hostname \
+	should_print_version \
+	should_print_arch \
+	should_print_everything

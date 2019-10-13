@@ -1,0 +1,14 @@
+#!/bin/sh
+tool="logname"
+. "$HARNESS"
+
+should_give_logname() {
+	# These are not necessarily the same, but are usually so
+	[ "$(logname)" = "$(id -un)" ]
+}
+
+should_handle_ddash logname
+
+runtests \
+	should_handle_ddash \
+	should_give_logname

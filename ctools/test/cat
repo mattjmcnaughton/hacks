@@ -1,0 +1,39 @@
+#!/bin/sh
+tool="cat"
+. "$HARNESS"
+
+echo "this is a test file" >"$TMPDIR"/test-file-1
+echo "this is another test file" >"$TMPDIR"/test-file-2
+
+should_handle_one_file() (
+	ct="$(cat "$TMPDIR"/test-file-1)"
+	[ "$ct" = "this is a test file" ]
+)
+
+should_handle_two_files() (
+	ct="$(cat "$TMPDIR"/test-file-1 "$TMPDIR"/test-file-2)"
+	ref=$(echo "this is a test file" && echo "this is another test file")
+	[ "$ct" = "$ref" ]
+)
+
+should_handle_stdin() (
+	ct="$(echo "this is from stdin" | cat -)"
+	[ "$ct" = "this is from stdin" ] || return 1
+	ct="$(echo "this is from stdin" | cat)"
+	[ "$ct" = "this is from stdin" ]
+)
+
+should_handle_u_flag() (
+	# actual behavior is not especially important/testable
+	ct="$(echo "this is from stdin" | cat -u)"
+	[ "$ct" = "this is from stdin" ]
+)
+
+should_handle_ddash cat /dev/null
+
+runtests \
+	should_handle_ddash \
+	should_handle_one_file \
+	should_handle_two_files \
+	should_handle_stdin \
+	should_handle_u_flag

@@ -1,0 +1,56 @@
+#!/bin/sh
+tool="cmp"
+. "$HARNESS"
+
+should_handle_samefile() (
+	[ "$(cmp "$HARNESS" "$HARNESS")" = "" ]
+)
+
+should_handle_stdin() (
+	[ "$(cmp "$HARNESS" <"$HARNESS")" = "" ]
+)
+
+should_handle_difference() (
+	[ "$(echo test | cmp "$HARNESS" - || true)" \
+		= "$HARNESS - differ: char 1, line 1" ]
+)
+
+should_handle_mutex() (
+	! cmp -ls "$HARNESS" /dev/null >/dev/null 2>&1
+)
+
+should_handle_lflag() (
+	[ "$(echo test | cmp -l "$HARNESS" - || true)" \
+		= "1 163 164" ]
+)
+
+should_handle_sflag() (
+	[ "$(echo test | cmp -s "$HARNESS" -)" = "" ]
+)
+
+should_handle_exitcode() (
+	set +e
+	trap 'set -e' EXIT
+	cmp "$HARNESS" /dev/null >/dev/null 2>&1
+	if ! [ $? -eq 1 ]
+	then
+		return 1
+	fi
+	cmp /dev/does/not/exist /dev/null >/dev/null 2>&1
+	if ! [ $? -gt 1 ]
+	then
+		return 1
+	fi
+)
+
+should_handle_ddash cmp "$HARNESS" "$HARNESS"
+
+runtests \
+	should_handle_ddash \
+	should_handle_samefile \
+	should_handle_difference \
+	should_handle_stdin \
+	should_handle_mutex \
+	should_handle_lflag \
+	should_handle_sflag \
+	should_handle_exitcode

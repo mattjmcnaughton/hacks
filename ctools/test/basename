@@ -1,0 +1,38 @@
+#!/bin/sh
+tool="basename"
+. "$HARNESS"
+
+should_handle_null_string() (
+	bn="$(basename '')"
+	[ "$bn" = "." ] || [ "$bn" = "" ]
+)
+
+should_handle_slashes() (
+	bn="$(basename '////')"
+	[ "$bn" = "/" ]
+)
+
+should_handle_trailing_slashes() (
+	bn="$(basename 'bar/')"
+	[ "$bn" = "bar" ]
+)
+
+should_handle_basename() (
+	bn="$(basename '/foo/bar/baz')"
+	[ "$bn" = "baz" ]
+)
+
+should_handle_suffix() (
+	bn="$(basename '/foo/bar/baz.txt' '.txt')"
+	[ "$bn" = "baz" ]
+)
+
+should_handle_ddash basename foo/bar.txt .txt
+
+runtests \
+	should_handle_ddash \
+	should_handle_null_string \
+	should_handle_slashes \
+	should_handle_trailing_slashes \
+	should_handle_basename \
+	should_handle_suffix

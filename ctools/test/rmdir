@@ -1,0 +1,19 @@
+#!/bin/sh
+tool="rmdir"
+. "$HARNESS"
+
+should_remove_dirs() {
+	mkdir foo bar
+	rmdir foo bar
+	[ ! -d foo ] && [ ! -d bar ]
+}
+
+should_remove_paths() {
+	mkdir -p foo/bar bar/baz
+	rmdir -p foo/bar bar/baz
+	[ ! -d foo ] && [ ! -d bar ]
+}
+
+runtests \
+	should_remove_dirs
+	should_remove_paths

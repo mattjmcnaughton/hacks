@@ -1,0 +1,30 @@
+#!/bin/sh
+tool="tty"
+. "$HARNESS"
+
+should_print_tty() {
+	if [ "$(uname)" != "Linux" ]
+	then
+		printf "SKIP(requires Linux) "
+		return
+	fi
+	tty=$(tty)
+	if [ "$tty" = "not a tty" ]
+	then
+		printf "SKIP(not a tty) "
+		return
+	fi
+	[ "$(tty | cut -d/ -f2)" = "dev" ]
+}
+
+should_print_notty() {
+	tty=$(tty </dev/null)
+	[ "$tty" = "not a tty" ]
+}
+
+should_handle_ddash tty
+
+runtests \
+	should_handle_ddash \
+	should_print_tty \
+	should_print_notty

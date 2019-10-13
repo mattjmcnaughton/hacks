@@ -1,0 +1,2 @@
+option('xsi', type: 'boolean', value: true, description: 'Enable optional XSI support')
+option('man-pages', type: 'feature', value: 'auto', description: 'Generate and install man pages')

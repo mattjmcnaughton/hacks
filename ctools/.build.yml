@@ -1,0 +1,15 @@
+image: alpine/latest
+packages:
+- meson
+- scdoc
+sources:
+- https://git.sr.ht/~sircmpwn/ctools
+tasks:
+- build: |
+    cd ctools
+    meson . build -Dwerror=true
+    ninja -C build
+- test: |
+    cd ctools
+    meson configure build -Db_sanitize=address,undefined
+    ninja -C build test

@@ -1,0 +1,36 @@
+#!/bin/sh
+tool="cksum"
+. "$HARNESS"
+
+should_handle_empty_stdin() (
+	[ "$(cksum </dev/null)" = "4294967295 0" ]
+)
+
+should_handle_normal_stdin() (
+	[ "$(echo hello world | cksum)" = "3733384285 12" ]
+)
+
+should_handle_empty_file() (
+	[ "$(cksum </dev/null)" = "4294967295 0" ]
+)
+
+should_handle_largefile() (
+	[ "$(largefile | cksum)" = "4033688160 12288" ]
+)
+
+should_handle_multifile() (
+	largefile >"$TMPDIR"/largefile
+	output=$(cksum /dev/null "$TMPDIR"/largefile)
+	[ "$(echo "$output" | head -n1)" = "4033688160 12288 $TMPDIR/largefile" ]
+	[ "$(echo "$output" | head -n1)" = "4294967295 0 /dev/null" ]
+)
+
+should_handle_ddash cksum /dev/null
+
+runtests \
+	should_handle_ddash \
+	should_handle_empty_stdin \
+	should_handle_normal_stdin \
+	should_handle_empty_file \
+	should_handle_largefile \
+	should_handle_multifile
