@@ -82,10 +82,15 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
+		// When we define the symbol, the `Define` method sets the
+		// proper scope (i.e. global or local).
 		symbol := c.symbolTable.Define(node.Name.Value)
-		// Each symbol has an index... our vm will store variable values
-		// at that index.
-		c.emit(code.OpSetGlobal, symbol.Index)
+
+		if symbol.Scope == GlobalScope {
+			c.emit(code.OpSetGlobal, symbol.Index)
+		} else {
+			c.emit(code.OpSetLocal, symbol.Index)
+		}
 
 	case *ast.PrefixExpression:
 		err := c.Compile(node.Right)
@@ -220,8 +225,11 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return fmt.Errorf("undefined variable %s", node.Value)
 		}
 
-		// Retrieve the global based on the symbol index
-		c.emit(code.OpGetGlobal, symbol.Index)
+		if symbol.Scope == GlobalScope {
+			c.emit(code.OpGetGlobal, symbol.Index)
+		} else {
+			c.emit(code.OpGetLocal, symbol.Index)
+		}
 
 	case *ast.IntegerLiteral:
 		integer := &object.Integer{Value: node.Value}
@@ -399,6 +407,8 @@ func (c *Compiler) enterScope() {
 
 	c.scopes = append(c.scopes, scope)
 	c.scopeIndex++
+
+	c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
 }
 
 func (c *Compiler) leaveScope() code.Instructions {
@@ -406,6 +416,8 @@ func (c *Compiler) leaveScope() code.Instructions {
 
 	c.scopes = c.scopes[:len(c.scopes)-1]
 	c.scopeIndex--
+
+	c.symbolTable = c.symbolTable.Outer
 
 	return instructions
 }
