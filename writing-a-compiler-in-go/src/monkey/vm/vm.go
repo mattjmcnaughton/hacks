@@ -206,6 +206,10 @@ func (vm *VM) Run() error {
 			}
 
 		case code.OpCall:
+			// TMP: Skip the instruction indicating how many
+			// arguments.
+			vm.currentFrame().ip += 1
+
 			// A compiled function should be on the top of the stack
 			// when we issues `OpCall`.
 			fn, ok := vm.stack[vm.sp-1].(*object.CompiledFunction)
