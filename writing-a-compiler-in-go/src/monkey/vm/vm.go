@@ -206,22 +206,13 @@ func (vm *VM) Run() error {
 			}
 
 		case code.OpCall:
-			// TMP: Skip the instruction indicating how many
-			// arguments.
+			numArgs := code.ReadUint8(ins[ip+1:])
 			vm.currentFrame().ip += 1
 
-			// A compiled function should be on the top of the stack
-			// when we issues `OpCall`.
-			fn, ok := vm.stack[vm.sp-1].(*object.CompiledFunction)
-			if !ok {
-				return fmt.Errorf("calling non-function")
+			err := vm.callFunction(int(numArgs))
+			if err != nil {
+				return err
 			}
-			frame := NewFrame(fn, vm.sp)
-			vm.pushFrame(frame)
-
-			// Allocate space on the stack for local variables
-			// defined within `fn`
-			vm.sp = frame.basePointer + fn.NumLocals
 
 		case code.OpReturnValue:
 			// Pop the return value off the stack.
@@ -471,6 +462,27 @@ func (vm *VM) executeBangOperator() error {
 	default:
 		return vm.push(False)
 	}
+}
+
+func (vm *VM) callFunction(numArgs int) error {
+	fn, ok := vm.stack[vm.sp-1-numArgs].(*object.CompiledFunction)
+	if !ok {
+		return fmt.Errorf("calling non-function")
+	}
+
+	if numArgs != fn.NumParameters {
+		return fmt.Errorf("wrong number of arguments: want=%d, got=%d", fn.NumParameters, numArgs)
+	}
+
+	// The new frame should take the number of arguments into account when
+	// setting its base pointer. We want the base pointer to be before the
+	// arguments on the stack.
+	frame := NewFrame(fn, vm.sp-numArgs)
+	vm.pushFrame(frame)
+
+	vm.sp = frame.basePointer + fn.NumLocals
+
+	return nil
 }
 
 func (vm *VM) pop() object.Object {

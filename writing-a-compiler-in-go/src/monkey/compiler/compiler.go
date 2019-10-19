@@ -217,6 +217,9 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
+		// We can expect compiling the arguments will create
+		// instructions which will ultimately lead to values with which
+		// we call the function being placed on the stack.
 		for _, a := range node.Arguments {
 			err := c.Compile(a)
 			if err != nil {
@@ -287,12 +290,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 			// Create a local variable definition for each argument
 			// in the symbol table.
 			//
-			// I presume we will use the index value from the symbol
-			// table entry when we call the function. The index
-			// values will tell us where to store the values with
-			// which we are calling the function on the stack (i.e.
-			// similar to other local variables, except without the
-			// explicit OpSetLocal compile instruction).
+			// When we call the function, we can expect the values
+			// to be on the stack, because we call `Compile` for
+			// each argument to the function.
+			// Because we set the base pointer to be below the
+			// arguments, they are treated as local variables, so
+			// the symbol table definition will create the correct
+			// index.
 			c.symbolTable.Define(p.Value)
 		}
 
@@ -315,8 +319,9 @@ func (c *Compiler) Compile(node ast.Node) error {
 		instructions := c.leaveScope()
 
 		compiledFn := &object.CompiledFunction{
-			Instructions: instructions,
-			NumLocals:    numLocals,
+			Instructions:  instructions,
+			NumLocals:     numLocals,
+			NumParameters: len(node.Parameters),
 		}
 		c.emit(code.OpConstant, c.addConstant(compiledFn))
 
