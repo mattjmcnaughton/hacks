@@ -283,6 +283,19 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.FunctionLiteral:
 		c.enterScope()
 
+		for _, p := range node.Parameters {
+			// Create a local variable definition for each argument
+			// in the symbol table.
+			//
+			// I presume we will use the index value from the symbol
+			// table entry when we call the function. The index
+			// values will tell us where to store the values with
+			// which we are calling the function on the stack (i.e.
+			// similar to other local variables, except without the
+			// explicit OpSetLocal compile instruction).
+			c.symbolTable.Define(p.Value)
+		}
+
 		err := c.Compile(node.Body)
 		if err != nil {
 			return err
