@@ -26,14 +26,15 @@
 #include <limits.h>
 #include "tlpi_hdr.h"
 
-static void             /* Display information from inotify_event structure */
+static void /* Display information from `inotify_event` struct */
 displayInotifyEvent(struct inotify_event *i)
 {
-    printf("    wd =%2d; ", i->wd);
+    printf("    wd=%2d; ", i->wd);
     if (i->cookie > 0)
         printf("cookie =%4d; ", i->cookie);
 
     printf("mask = ");
+
     if (i->mask & IN_ACCESS)        printf("IN_ACCESS ");
     if (i->mask & IN_ATTRIB)        printf("IN_ATTRIB ");
     if (i->mask & IN_CLOSE_NOWRITE) printf("IN_CLOSE_NOWRITE ");
@@ -62,6 +63,7 @@ int
 main(int argc, char *argv[])
 {
     int inotifyFd, wd, j;
+    /* Specify type attribute */
     char buf[BUF_LEN] __attribute__ ((aligned(8)));
     ssize_t numRead;
     char *p;
@@ -70,21 +72,21 @@ main(int argc, char *argv[])
     if (argc < 2 || strcmp(argv[1], "--help") == 0)
         usageErr("%s pathname...\n", argv[0]);
 
-    inotifyFd = inotify_init();                 /* Create inotify instance */
+    inotifyFd = inotify_init();
     if (inotifyFd == -1)
         errExit("inotify_init");
 
-    /* For each command-line argument, add a watch for all events */
-
+    /* For each command line argument, add a watch for all events */
     for (j = 1; j < argc; j++) {
         wd = inotify_add_watch(inotifyFd, argv[j], IN_ALL_EVENTS);
         if (wd == -1)
             errExit("inotify_add_watch");
 
-        printf("Watching %s using wd %d\n", argv[j], wd);
+        printf("watching %s using wd %d\n", argv[j], wd);
     }
 
-    for (;;) {                                  /* Read events forever */
+    for (;;) { /* Read events forever */
+        // Will block until there are inotify events...
         numRead = read(inotifyFd, buf, BUF_LEN);
         if (numRead == 0)
             fatal("read() from inotify fd returned 0!");
@@ -93,8 +95,6 @@ main(int argc, char *argv[])
             errExit("read");
 
         printf("Read %ld bytes from inotify fd\n", (long) numRead);
-
-        /* Process all of the events in buffer returned by read() */
 
         for (p = buf; p < buf + numRead; ) {
             event = (struct inotify_event *) p;
