@@ -78,6 +78,7 @@ const (
 	OpSetGlobal
 	OpGetLocal
 	OpSetLocal
+	OpGetBuiltin
 
 	OpArray
 	OpHash
@@ -119,6 +120,10 @@ var definitions = map[Opcode]*Definition{
 	OpSetGlobal: {"OpSetGlobal", []int{2}},
 	OpGetLocal:  {"OpGetLocal", []int{1}},
 	OpSetLocal:  {"OpSetLocal", []int{1}},
+
+	// The operand for `OpGetBuiltin` is the index of the builtin in
+	// `object/builtins.go#Builtins`.
+	OpGetBuiltin: {"OpGetBuiltin", []int{1}},
 
 	OpArray: {"OpArray", []int{2}},
 	OpHash:  {"OpHash", []int{2}},
