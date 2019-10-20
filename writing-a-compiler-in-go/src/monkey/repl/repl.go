@@ -23,7 +23,12 @@ func Start(in io.Reader, out io.Writer) {
 	// Want to retain global state for each repl loop
 	constants := []object.Object{}
 	globals := make([]object.Object, vm.GlobalsSize)
+
+	// We need to load the builtins into the compiler.
 	symbolTable := compiler.NewSymbolTable()
+	for i, v := range object.Builtins {
+		symbolTable.DefineBuiltin(i, v.Name)
+	}
 
 	for {
 		fmt.Printf(PROMPT)
