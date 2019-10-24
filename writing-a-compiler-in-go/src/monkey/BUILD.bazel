@@ -17,3 +17,13 @@ go_binary(
     embed = [":go_default_library"],
     visibility = ["//visibility:public"],
 )
+
+alias(
+    name = "main",
+    actual = ":monkey",
+)
+
+alias(
+    name = "benchmark",
+    actual = "//benchmark:benchmark",
+)

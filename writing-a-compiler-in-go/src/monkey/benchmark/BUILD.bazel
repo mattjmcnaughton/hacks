@@ -1,0 +1,22 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "go_default_library",
+    srcs = ["main.go"],
+    importpath = "monkey/benchmark",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//compiler:go_default_library",
+        "//evaluator:go_default_library",
+        "//lexer:go_default_library",
+        "//object:go_default_library",
+        "//parser:go_default_library",
+        "//vm:go_default_library",
+    ],
+)
+
+go_binary(
+    name = "benchmark",
+    embed = [":go_default_library"],
+    visibility = ["//visibility:public"],
+)
