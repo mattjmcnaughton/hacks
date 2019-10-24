@@ -91,6 +91,7 @@ const (
 	OpReturn
 
 	OpClosure
+	OpGetFree
 )
 
 type Definition struct {
@@ -144,6 +145,7 @@ var definitions = map[Opcode]*Definition{
 	// The second operand specifies how many free variables sit on the stack
 	// and need to be transferred to the about-to-be-created closure.
 	OpClosure: {"OpClosure", []int{2, 1}},
+	OpGetFree: {"OpGetFree", []int{1}},
 }
 
 func Lookup(op byte) (*Definition, error) {
