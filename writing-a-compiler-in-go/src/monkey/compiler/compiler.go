@@ -84,14 +84,17 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 	case *ast.LetStatement:
+		// When we define the symbol, the `Define` method sets the
+		// proper scope (i.e. global or local).
+		//
+		// We move the `Define` call before the `Compile` to support
+		// recursively calling functions.
+		symbol := c.symbolTable.Define(node.Name.Value)
+
 		err := c.Compile(node.Value)
 		if err != nil {
 			return err
 		}
-
-		// When we define the symbol, the `Define` method sets the
-		// proper scope (i.e. global or local).
-		symbol := c.symbolTable.Define(node.Name.Value)
 
 		if symbol.Scope == GlobalScope {
 			c.emit(code.OpSetGlobal, symbol.Index)
