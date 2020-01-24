@@ -24,13 +24,14 @@ int
 main(int argc, char *argv[])
 {
     int fd, flags;
-    char template[] = "/tmp/testXXXXXX";
+    char template[] = "/tmp/testXXXXXXX";
 
-    setbuf(stdout, NULL);                   /* Disable buffering of stdout */
+    setbuf(stdout, NULL); // Disable stdout buffering
 
-    /* Open a temporary file, set its file offset to some arbitrary value,
-       and change the setting of one of the open file status flags. */
-
+    /*
+     * Open tmp file, set file offset to some arbitrary value and change the
+     * setting of one of the open file status flags.
+     */
     fd = mkstemp(template);
     if (fd == -1)
         errExit("mkstemp");
@@ -42,27 +43,28 @@ main(int argc, char *argv[])
     if (flags == -1)
         errExit("fcntl - F_GETFL");
     printf("O_APPEND flag before fork() is: %s\n",
-            (flags & O_APPEND) ? "on" : "off");
+           (flags & O_APPEND) ? "on" : "off");
 
     switch (fork()) {
     case -1:
         errExit("fork");
 
-    case 0:     /* Child: change file offset and status flags */
+    case 0: /* Child: change file offset and status flags */
         if (lseek(fd, 1000, SEEK_SET) == -1)
             errExit("lseek");
 
-        flags = fcntl(fd, F_GETFL);         /* Fetch current flags */
+        flags = fcntl(fd, F_GETFL);
         if (flags == -1)
             errExit("fcntl - F_GETFL");
+
         flags |= O_APPEND;                  /* Turn O_APPEND on */
         if (fcntl(fd, F_SETFL, flags) == -1)
             errExit("fcntl - F_SETFL");
         _exit(EXIT_SUCCESS);
 
-    default:    /* Parent: can see file changes made by child */
-        if (wait(NULL) == -1)
-            errExit("wait");                /* Wait for child exit */
+    default: /* Parent: can see file changes made by child */
+        if (wait(NULL) == -1) // Wait for child process to exit... because pass NULL, wait doesn't store value.
+            errExit("wait");
         printf("Child has exited\n");
 
         printf("File offset in parent: %lld\n",
@@ -72,7 +74,8 @@ main(int argc, char *argv[])
         if (flags == -1)
             errExit("fcntl - F_GETFL");
         printf("O_APPEND flag in parent is: %s\n",
-                (flags & O_APPEND) ? "on" : "off");
+               (flags & O_APPEND) ? "on" : "off");
+
         exit(EXIT_SUCCESS);
     }
 }
