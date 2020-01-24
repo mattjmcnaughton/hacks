@@ -33,13 +33,18 @@ main(int argc, char *argv[])
     sigset_t blockMask, origMask, emptyMask;
     struct sigaction sa;
 
-    setbuf(stdout, NULL);               /* Disable buffering of stdout */
+    setbuf(stdout, NULL); // disable stdout buffering
 
+    // Create empty set of signals, add SYNC_SIG to set, and then set current thread to
+    // block that set of signals
     sigemptyset(&blockMask);
-    sigaddset(&blockMask, SYNC_SIG);    /* Block signal */
+    sigaddset(&blockMask, SYNC_SIG);
     if (sigprocmask(SIG_BLOCK, &blockMask, &origMask) == -1)
         errExit("sigprocmask");
 
+    // When we receive a blocked signal, call the `handler`.
+    // We set `sa.sa_mask` to empty bc the we already updated the threads sig
+    // mask to include SYNC_SIG (?)
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = handler;
@@ -50,10 +55,7 @@ main(int argc, char *argv[])
     case -1:
         errExit("fork");
 
-    case 0: /* Child */
-
-        /* Child does some required action here... */
-
+    case 0: // Child
         printf("[%s %ld] Child started - doing some work\n",
                 currTime("%T"), (long) getpid());
         sleep(2);               /* Simulate time spent doing some work */
@@ -62,6 +64,7 @@ main(int argc, char *argv[])
 
         printf("[%s %ld] Child about to signal parent\n",
                 currTime("%T"), (long) getpid());
+        // Use getppid to get the parent's pid - sent it the SYNC_SIG signal.
         if (kill(getppid(), SYNC_SIG) == -1)
             errExit("kill");
 
@@ -73,16 +76,18 @@ main(int argc, char *argv[])
 
         /* Parent may do some work here, and then waits for child to
            complete the required action */
-
         printf("[%s %ld] Parent about to wait for signal\n",
                 currTime("%T"), (long) getpid());
         sigemptyset(&emptyMask);
+        // `sigsuspend` replaces the mask of the calling thread with the mask
+        // given by mask and then suspend the thread until delivery of a signal
+        // whose action is to invoke a signal handler or terminate a process.
         if (sigsuspend(&emptyMask) == -1 && errno != EINTR)
             errExit("sigsuspend");
         printf("[%s %ld] Parent got signal\n", currTime("%T"), (long) getpid());
 
-        /* If required, return signal mask to its original state */
-
+        // Set the blocked signals to the original set (i.e. whatever existed
+        // before we temporarily blocked SYNC_SIG).
         if (sigprocmask(SIG_SETMASK, &origMask, NULL) == -1)
             errExit("sigprocmask");
 
