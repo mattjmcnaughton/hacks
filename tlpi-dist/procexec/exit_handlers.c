@@ -42,7 +42,7 @@ static void
 onexitFunc(int exitStatus, void *arg)
 {
     printf("on_exit function called: status=%d, arg=%ld\n",
-                exitStatus, (long) arg);
+            exitStatus, (long) arg);
 }
 #endif
 
