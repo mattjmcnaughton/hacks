@@ -19,25 +19,30 @@
 int
 main(int argc, char *argv[])
 {
-    char *argVec[10];           /* Larger than required */
-    char *envVec[] = { "GREET=salut", "BYE=adieu", NULL };
+    char *argVec[10]; // Larger than required
+    char *envVec[] = {
+        "GREET=salut",
+        "BYE=adieu",
+        NULL
+    };
 
     if (argc != 2 || strcmp(argv[1], "--help") == 0)
         usageErr("%s pathname\n", argv[0]);
 
-    /* Create an argument list for the new program */
+    /* Create arg list for new program */
 
-    argVec[0] = strrchr(argv[1], '/');      /* Get basename from argv[1] */
+    // For `argVec[0]`, want to fetch basename by reverse searching for first
+    // `/` and then moving forward one char.
+    argVec[0] = strrchr(argv[1], '/');
     if (argVec[0] != NULL)
         argVec[0]++;
     else
         argVec[0] = argv[1];
     argVec[1] = "hello world";
     argVec[2] = "goodbye";
-    argVec[3] = NULL;           /* List must be NULL-terminated */
+    argVec[3] = NULL;
 
-    /* Execute the program specified in argv[1] */
-
+    /* Execute program specified by `argv[1]` */
     execve(argv[1], argVec, envVec);
-    errExit("execve");          /* If we get here, something went wrong */
+    errExit("execve"); // If we get here, something went wrong.
 }
