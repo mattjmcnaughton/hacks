@@ -16,6 +16,7 @@
 */
 #include "tlpi_hdr.h"
 
+// Global variable listing environment values
 extern char **environ;
 
 int
@@ -24,12 +25,8 @@ main(int argc, char *argv[])
     int j;
     char **ep;
 
-    /* Display argument list */
-
     for (j = 0; j < argc; j++)
         printf("argv[%d] = %s\n", j, argv[j]);
-
-    /* Display environment list */
 
     for (ep = environ; *ep != NULL; ep++)
         printf("environ: %s\n", *ep);

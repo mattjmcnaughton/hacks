@@ -13,18 +13,15 @@
 /* t_execve.c
 
    Demonstrate the use of execve() to execute a program.
+   `execve` replaces the currently running program.
 */
 #include "tlpi_hdr.h"
 
 int
 main(int argc, char *argv[])
 {
-    char *argVec[10]; // Larger than required
-    char *envVec[] = {
-        "GREET=salut",
-        "BYE=adieu",
-        NULL
-    };
+    char *argVec[10];
+    char *envVec[] = { "GREET=sault", "BYE=adieu", NULL };
 
     if (argc != 2 || strcmp(argv[1], "--help") == 0)
         usageErr("%s pathname\n", argv[0]);
@@ -44,5 +41,5 @@ main(int argc, char *argv[])
 
     /* Execute program specified by `argv[1]` */
     execve(argv[1], argVec, envVec);
-    errExit("execve"); // If we get here, something went wrong.
+    errExit("execve"); // If we get here, we messed up.
 }
