@@ -23,14 +23,15 @@
 int
 main(int argc, char *argv[])
 {
-    char str[MAX_CMD_LEN];      /* Command to be executed by system() */
-    int status;                 /* Status return from system() */
+    char str[MAX_CMD_LEN];
+    int status;
 
-    for (;;) {                  /* Read and execute a shell command */
+    for (;;) { // Infinite loop
         printf("Command: ");
         fflush(stdout);
+
         if (fgets(str, MAX_CMD_LEN, stdin) == NULL)
-            break;              /* end-of-file */
+            break; // end of file
 
         status = system(str);
         printf("system() returned: status=0x%04x (%d,%d)\n",
