@@ -1,7 +1,7 @@
-build_repl: repl.c
-	gcc -o repl repl.c
+build_main: main.c
+	gcc -o main *.c
 
-build: build_repl
+build: build_main
 
 clean:
-	rm repl
+	rm main
