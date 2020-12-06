@@ -8,3 +8,6 @@ test: clean build
 
 clean:
 	rm main
+
+fmt:
+	bundle exec rbprettier --write 'spec/*.rb'

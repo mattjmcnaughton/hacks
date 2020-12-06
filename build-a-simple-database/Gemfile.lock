@@ -1,6 +1,8 @@
 GEM
+  remote: https://rubygems.org/
   specs:
     diff-lcs (1.4.4)
+    prettier (0.21.0)
     rspec (3.9.0)
       rspec-core (~> 3.9.0)
       rspec-expectations (~> 3.9.0)
@@ -19,6 +21,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  prettier
   rspec
 
 BUNDLED WITH
