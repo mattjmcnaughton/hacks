@@ -35,6 +35,5 @@ extern const uint32_t TABLE_MAX_ROWS;
 void print_row(Row* row);
 void serialize_row(Row* source, void* destination);
 void deserialize_row(void* source, Row* destination);
-void* row_slot(Table* table, uint32_t row_num);
 
 #endif

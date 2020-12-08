@@ -7,7 +7,7 @@ test: clean build
 	bundle exec rspec
 
 clean:
-	rm main
+	rm main || true
 
 fmt:
 	bundle exec rbprettier --write 'spec/*.rb'
