@@ -5,6 +5,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+// As best as I can tell, `sys/stat.h` is only required on FreeBSD.
+#if defined(__FreeBSD__)
+#include <sys/stat.h>
+#endif
+
 #include "pager.h"
 
 // Page size is 4kb, which is the same size as the page used in virtual memory
