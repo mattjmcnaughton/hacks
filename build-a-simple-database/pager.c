@@ -5,18 +5,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-// As best as I can tell, `sys/stat.h` is only required on FreeBSD.
 #if defined(__FreeBSD__)
 #include <sys/stat.h>
 #endif
 
+#include "constants.h"
 #include "pager.h"
 
-// Page size is 4kb, which is the same size as the page used in virtual memory
-// systems of most architectures. One page in our db corresponds to one page
-// used by the operating system. Means OS will move pages in and out of memory
-// as whole units instead of breaking them up.
-const uint32_t PAGE_SIZE = _PAGE_SIZE;
 
 Pager* pager_open(const char* filename) {
     int fd = open(filename,
@@ -36,6 +31,14 @@ Pager* pager_open(const char* filename) {
     Pager* pager = malloc(sizeof(Pager));
     pager->file_descriptor = fd;
     pager->file_length = file_length;
+
+    // Because we do not store partial pages, we can just divide the
+    // `file_length` by the `PAGE_SIZE`.
+    pager->num_pages = (file_length / PAGE_SIZE);
+    if (file_length % PAGE_SIZE != 0) {
+        printf("Db file is not a whole number of pages. Corrupt file.\n");
+        exit(EXIT_FAILURE);
+    }
 
     for (uint32_t i = 0; i < TABLE_MAX_PAGES; i++) {
         pager->pages[i] = NULL;
@@ -80,12 +83,16 @@ void* get_page(Pager* pager, uint32_t page_num) {
         }
 
         pager->pages[page_num] = page;
+
+        if (page_num >= pager->num_pages) {
+            pager->num_pages = page_num + 1;
+        }
     }
 
     return pager->pages[page_num];
 }
 
-void pager_flush(Pager* pager, uint32_t page_num, uint32_t size) {
+void pager_flush(Pager* pager, uint32_t page_num) {
     if (pager->pages[page_num] == NULL) {
         printf("Tried to flush null page\n");
         exit(EXIT_FAILURE);
@@ -98,7 +105,9 @@ void pager_flush(Pager* pager, uint32_t page_num, uint32_t size) {
         exit(EXIT_FAILURE);
     }
 
-    ssize_t bytes_written = write(pager->file_descriptor, pager->pages[page_num], size);
+    // Each node takes up exactly one page, even if it's not full. As a result,
+    // the apger no longer needs to support reading/writing partial pages.
+    ssize_t bytes_written = write(pager->file_descriptor, pager->pages[page_num], PAGE_SIZE);
 
     if (bytes_written == -1) {
         printf("Error writing: %d\n", errno);

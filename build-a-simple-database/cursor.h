@@ -8,7 +8,11 @@
 
 typedef struct {
   Table* table;
-  uint32_t row_num;
+  // Our cursor represents a position in the table. Now that our table is
+  // represented via a b-tree, we identify a position by the page number of the
+  // node, and the cell number within that node.
+  uint32_t page_num;
+  uint32_t cell_num;
   bool end_of_table; // Indicates a position one past the last element.
 } Cursor;
 
