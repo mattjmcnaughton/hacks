@@ -9,19 +9,20 @@
 #include "table.h"
 #include "pager.h"
 
-PrepareResult prepare_insert(InputBuffer* input_buffer, Statement* statement) {
+PrepareResult prepare_insert(InputBuffer * input_buffer, Statement * statement)
+{
     statement->type = STATEMENT_INSERT;
 
     // We use `strtok` to divide the input by spaces, and assign to the proper
     // fields. We cannot use `sscanf`, as if the string sscanf is reading is
     // larger than the buffers it's reading into, it will cause a buffer
     // overflow and start writing to unexpected places.
-    char* keyword = strtok(input_buffer->buffer, " ");
+    char *keyword = strtok(input_buffer->buffer, " ");
     // Passing `NULL` as the first argument indicates we should re-use
     // `input_buffer->buffer`.
-    char* id_string = strtok(NULL, " ");
-    char* username = strtok(NULL, " ");
-    char* email = strtok(NULL, " ");
+    char *id_string = strtok(NULL, " ");
+    char *username = strtok(NULL, " ");
+    char *email = strtok(NULL, " ");
 
     if (id_string == NULL || username == NULL || email == NULL) {
         return PREPARE_SYNTAX_ERROR;
@@ -47,7 +48,9 @@ PrepareResult prepare_insert(InputBuffer* input_buffer, Statement* statement) {
     return PREPARE_SUCCESS;
 }
 
-PrepareResult prepare_statement(InputBuffer* input_buffer, Statement* statement) {
+PrepareResult prepare_statement(InputBuffer * input_buffer,
+                                Statement * statement)
+{
     if (strncmp(input_buffer->buffer, "insert", 6) == 0) {
         return prepare_insert(input_buffer, statement);
     }
@@ -60,16 +63,17 @@ PrepareResult prepare_statement(InputBuffer* input_buffer, Statement* statement)
     return PREPARE_UNRECOGNIZED_STATEMENT;
 }
 
-ExecuteResult execute_insert(Statement* statement, Table* table) {
-    void* node = get_page(table->pager, table->root_page_num);
+ExecuteResult execute_insert(Statement * statement, Table * table)
+{
+    void *node = get_page(table->pager, table->root_page_num);
     uint32_t num_cells = (*leaf_node_num_cells(node));
     if (num_cells >= LEAF_NODE_MAX_CELLS) {
         return EXECUTE_TABLE_FULL;
     }
 
-    Row* row_to_insert = &(statement->row_to_insert);
+    Row *row_to_insert = &(statement->row_to_insert);
     uint32_t key_to_insert = row_to_insert->id;
-    Cursor* cursor = table_find(table, key_to_insert);
+    Cursor *cursor = table_find(table, key_to_insert);
 
     if (cursor->cell_num < num_cells) {
         uint32_t key_at_index = *leaf_node_key(node, cursor->cell_num);
@@ -85,8 +89,9 @@ ExecuteResult execute_insert(Statement* statement, Table* table) {
     return EXECUTE_SUCCESS;
 }
 
-ExecuteResult execute_select(Statement* statement, Table* table) {
-    Cursor* cursor = table_start(table);
+ExecuteResult execute_select(Statement * statement, Table * table)
+{
+    Cursor *cursor = table_start(table);
 
     Row row;
     while (!(cursor->end_of_table)) {
@@ -100,11 +105,12 @@ ExecuteResult execute_select(Statement* statement, Table* table) {
     return EXECUTE_SUCCESS;
 }
 
-ExecuteResult execute_statement(Statement* statement, Table* table) {
+ExecuteResult execute_statement(Statement * statement, Table * table)
+{
     switch (statement->type) {
-        case (STATEMENT_INSERT):
-            return execute_insert(statement, table);
-        case (STATEMENT_SELECT):
-            return execute_select(statement, table);
+    case (STATEMENT_INSERT):
+        return execute_insert(statement, table);
+    case (STATEMENT_SELECT):
+        return execute_select(statement, table);
     }
 }

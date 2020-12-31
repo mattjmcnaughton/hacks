@@ -9,6 +9,6 @@
  * Almost certainly, we could have a better name than `command` for this file.
  */
 
-void leaf_node_insert(Cursor* cursor, uint32_t key, Row* value);
+void leaf_node_insert(Cursor * cursor, uint32_t key, Row * value);
 
 #endif

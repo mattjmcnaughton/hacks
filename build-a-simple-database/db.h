@@ -3,7 +3,7 @@
 
 #include "table.h"
 
-Table* db_open(const char* filename);
-void db_close(Table* table);
+Table *db_open(const char *filename);
+void db_close(Table * table);
 
 #endif

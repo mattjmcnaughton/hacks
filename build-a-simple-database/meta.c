@@ -10,7 +10,8 @@
 #include "meta.h"
 #include "table.h"
 
-void print_constants() {
+void print_constants()
+{
     printf("ROW_SIZE: %d\n", ROW_SIZE);
     printf("COMMON_NODE_HEADER_SIZE: %d\n", COMMON_NODE_HEADER_SIZE);
     printf("LEAF_NODE_HEADER_SIZE: %d\n", LEAF_NODE_HEADER_SIZE);
@@ -19,7 +20,8 @@ void print_constants() {
     printf("LEAF_NODE_MAX_CELLS: %d\n", LEAF_NODE_MAX_CELLS);
 }
 
-void print_leaf_node(void* node) {
+void print_leaf_node(void *node)
+{
     uint32_t num_cells = *leaf_node_num_cells(node);
     printf("leaf (size %d)\n", num_cells);
     for (uint32_t i = 0; i < num_cells; i++) {
@@ -28,7 +30,8 @@ void print_leaf_node(void* node) {
     }
 }
 
-MetaCommandResult do_meta_command(InputBuffer* input_buffer, Table* table) {
+MetaCommandResult do_meta_command(InputBuffer * input_buffer, Table * table)
+{
     if (strcmp(input_buffer->buffer, ".exit") == 0) {
         db_close(table);
         close_input_buffer(input_buffer);

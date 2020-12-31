@@ -9,5 +9,10 @@ test: clean build
 clean:
 	rm main || true
 
-fmt:
+rubyfmt:
 	bundle exec rbprettier --write 'spec/*.rb'
+
+clangfmt:
+	VERSION_CONTROL=none indent $(wildcard *.c) $(wildcard *.h)
+
+fmt: rubyfmt clangfmt

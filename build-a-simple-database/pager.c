@@ -12,14 +12,14 @@
 #include "constants.h"
 #include "pager.h"
 
-
-Pager* pager_open(const char* filename) {
+Pager *pager_open(const char *filename)
+{
     int fd = open(filename,
-                  O_RDWR | // Read/write mode)
-                      O_CREAT, // Create file if does not exist
-                  S_IWUSR | // User write permission
-                      S_IRUSR // User read permission
-                  );
+                  O_RDWR |      // Read/write mode)
+                  O_CREAT,      // Create file if does not exist
+                  S_IWUSR |     // User write permission
+                  S_IRUSR       // User read permission
+        );
 
     if (fd == -1) {
         printf("Unable to open file\n");
@@ -28,7 +28,7 @@ Pager* pager_open(const char* filename) {
 
     off_t file_length = lseek(fd, 0, SEEK_END);
 
-    Pager* pager = malloc(sizeof(Pager));
+    Pager *pager = malloc(sizeof(Pager));
     pager->file_descriptor = fd;
     pager->file_length = file_length;
 
@@ -47,16 +47,18 @@ Pager* pager_open(const char* filename) {
     return pager;
 }
 
-void* get_page(Pager* pager, uint32_t page_num) {
+void *get_page(Pager * pager, uint32_t page_num)
+{
     if (page_num > TABLE_MAX_PAGES) {
-        printf("Tried to fetch page number out of bounds. %d > %d\n", page_num, TABLE_MAX_PAGES);
+        printf("Tried to fetch page number out of bounds. %d > %d\n", page_num,
+               TABLE_MAX_PAGES);
         exit(EXIT_FAILURE);
     }
 
     if (pager->pages[page_num] == NULL) {
         // Cache miss. Allocate memory (and if possible, load data in file into
         // memory).
-        void* page = malloc(PAGE_SIZE);
+        void *page = malloc(PAGE_SIZE);
         // We use file_length as an indicator of what data already exists. We
         // assume that pages are saved to the file one after another.
         uint32_t num_pages = pager->file_length / PAGE_SIZE;
@@ -65,7 +67,6 @@ void* get_page(Pager* pager, uint32_t page_num) {
         if (pager->file_length % PAGE_SIZE) {
             num_pages += 1;
         }
-
         // If we have data in the file, load it into memory. (I.e. populate the
         // cache). If we don't have any data, we will just return the "blank"
         // allocated memory.
@@ -92,22 +93,24 @@ void* get_page(Pager* pager, uint32_t page_num) {
     return pager->pages[page_num];
 }
 
-void pager_flush(Pager* pager, uint32_t page_num) {
+void pager_flush(Pager * pager, uint32_t page_num)
+{
     if (pager->pages[page_num] == NULL) {
         printf("Tried to flush null page\n");
         exit(EXIT_FAILURE);
     }
 
-    off_t offset = lseek(pager->file_descriptor, page_num * PAGE_SIZE, SEEK_SET);
+    off_t offset =
+        lseek(pager->file_descriptor, page_num * PAGE_SIZE, SEEK_SET);
 
     if (offset == -1) {
         printf("Error seeking: %d\n", errno);
         exit(EXIT_FAILURE);
     }
-
     // Each node takes up exactly one page, even if it's not full. As a result,
     // the apger no longer needs to support reading/writing partial pages.
-    ssize_t bytes_written = write(pager->file_descriptor, pager->pages[page_num], PAGE_SIZE);
+    ssize_t bytes_written =
+        write(pager->file_descriptor, pager->pages[page_num], PAGE_SIZE);
 
     if (bytes_written == -1) {
         printf("Error writing: %d\n", errno);

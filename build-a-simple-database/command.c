@@ -8,8 +8,9 @@
 #include "cursor.h"
 #include "table.h"
 
-void leaf_node_insert(Cursor* cursor, uint32_t key, Row* value) {
-    void* node = get_page(cursor->table->pager, cursor->page_num);
+void leaf_node_insert(Cursor * cursor, uint32_t key, Row * value)
+{
+    void *node = get_page(cursor->table->pager, cursor->page_num);
 
     uint32_t num_cells = *leaf_node_num_cells(node);
     if (num_cells >= LEAF_NODE_MAX_CELLS) {
@@ -23,7 +24,8 @@ void leaf_node_insert(Cursor* cursor, uint32_t key, Row* value) {
         // We use this to allow us to insert a new cell in the correct ordered
         // location.
         for (uint32_t i = num_cells; i > cursor->cell_num; i--) {
-            memcpy(leaf_node_cell(node, i), leaf_node_cell(node, i - 1), LEAF_NODE_CELL_SIZE);
+            memcpy(leaf_node_cell(node, i), leaf_node_cell(node, i - 1),
+                   LEAF_NODE_CELL_SIZE);
         }
     }
 
