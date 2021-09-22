@@ -1,3 +1,4 @@
+import re
 import sys
 import zlib
 
@@ -23,7 +24,18 @@ def main():
         with open(filename, "rb") as compressed_file:
             data = zlib.decompress(compressed_file.read())
 
-            sys.stdout.write(data.decode())
+            print(data)
+
+            # Works partially, but only under python2...
+            # Also does not return the type of the object.
+            # As far as I know, the type of the object should be included within
+            # this file. Is it using the `40000`?
+            entries = [
+                line[0:2] + (line[2].encode("hex"),)
+                for line in
+                re.findall("(\d+) (.*?)\0(.{20})", data, re.MULTILINE)
+            ]
+            print(entries)
 
 
 if __name__ == "__main__":
