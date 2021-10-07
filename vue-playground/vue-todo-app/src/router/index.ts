@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-import Home from "../views/Home.vue";
-import AddTask from "../views/AddTask/AddTask.vue";
+import Home from "@/views/Home.vue";
+import AddTask from "@/views/AddTask/AddTask.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
