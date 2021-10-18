@@ -1,11 +1,25 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 )
+
+type Project struct {
+	Id           int    `json:"id"`
+	Color        int    `json:"color"`
+	Name         string `json:"name"`
+	CommentCount int    `json:"comment_count"`
+	Shared       bool   `json:"shared"`
+	Favorite     bool   `json:"favorite"`
+	SyncId       int    `json:"sync_id"`
+	InboxProject bool   `json:"inbox_project"`
+	Url          string `json:"url"`
+}
 
 func main() {
 	client := &http.Client{}
@@ -18,15 +32,21 @@ func main() {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		log.Fatalf(err.Error())
 	}
 
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		log.Fatalf(err.Error())
 	}
 
-	println(string(body))
+	var projs []Project
+	err = json.Unmarshal([]byte(body), &projs)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	fmt.Printf("proj url: %#v\n", projs[0].Url)
 }
