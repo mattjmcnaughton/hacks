@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "data-science-from-scratch"
+version = "0.1.0"
+description = ""
+authors = ["mattjmcnaughton <mattjmcnaughton@gmail.com>"]
+license = "Apache"
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+ipython = "^7.29.0"
+numpy = "^1.21.4"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
