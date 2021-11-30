@@ -10,6 +10,8 @@ python = ">=3.8,<3.11"
 ipython = "^7.29.0"
 numpy = "^1.21.4"
 scipy = "^1.7.3"
+matplotlib = "^3.5.0"
+PyQt5 = "^5.15.6"
 
 [tool.poetry.dev-dependencies]
 
