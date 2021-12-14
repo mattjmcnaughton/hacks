@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "data-science-from-scratch"
+name = "dsfs"
 version = "0.1.0"
 description = ""
 authors = ["mattjmcnaughton <mattjmcnaughton@gmail.com>"]
