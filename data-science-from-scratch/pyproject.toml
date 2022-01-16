@@ -18,6 +18,7 @@ requests = "^2.26.0"
 Pillow = "^8.4.0"
 nltk = "^3.6.7"
 networkx = "^2.6.3"
+scikit-surprise = "^1.1.1"
 
 [tool.poetry.dev-dependencies]
 
