@@ -8,6 +8,6 @@ edition = "2018"
 
 [dependencies]
 rand = "0.6.5"
-rocket = "0.4.1"
+rocket = "0.4.7"
 rocket_contrib = "0.4.1"
 reqwest = "0.9.17"
