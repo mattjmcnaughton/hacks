@@ -57,7 +57,7 @@ gym[Box2D,atari,accept-rom-license]~=0.21.0
 tf-agents~=0.10.0
 
 ##### Image manipulation
-Pillow~=8.4.0
+Pillow~=9.3.0
 graphviz~=0.17
 opencv-python~=4.5.3.56
 pyglet~=1.5.21
